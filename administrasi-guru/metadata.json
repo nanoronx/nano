@@ -1,0 +1,6 @@
+{
+  "name": "Administrasi Guru",
+  "description": "Aplikasi administrasi guru Kurikulum Merdeka lengkap satu semester: CP, TP, Promes, Modul Ajar, Nilai, e-Rapor, dan Supervisi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

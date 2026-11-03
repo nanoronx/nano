@@ -1,0 +1,2683 @@
+import React, { useState, useMemo } from 'react';
+import {
+  BookOpen, CheckCircle2, FileText, Calendar, Layers, ClipboardList,
+  Users, Award, Download, Settings, Plus, Trash2, Edit3, Check,
+  ChevronRight, Smartphone, Printer, Sparkles, FolderCheck, Building2,
+  GraduationCap, Clock, FileSpreadsheet, Eye, RefreshCw, Copy, Search
+} from 'lucide-react';
+
+// ==========================================
+// BANK DATA KURIKULUM (OTOMATIS)
+// ==========================================
+const SUBJECT_PRESETS = {
+  Informatika: {
+    fase: 'Fase D',
+    cp: 'Pada akhir Fase D, peserta didik mampu menerapkan berpikir komputasional untuk menghasilkan beberapa solusi dari persoalan dengan data diskrit bervolume kecil serta mendisposisikan berpikir komputasional dalam bidang lain, mampu memanfaatkan aplikasi surel dan peramban untuk berkomunikasi dan mencari informasi secara efektif dengan menerapkan literasi digital, memahami konsep jaringan komputer dan internet (LAN, MAN, WAN, PAN), serta mampu mengakses, mengolah, dan menganalisis data secara efisien.',
+    tps: [
+      {
+        id: 'tp1',
+        code: '7.1',
+        title: 'Berpikir Komputasional (Algoritma & Struktur Data)',
+        jp: 12,
+        materi: 'Dekomposisi, Pengenalan Pola, Abstraksi, dan Algoritma',
+        indikator: 'Peserta didik mampu menyelesaikan persoalan logika dan pemodelan data diskrit menggunakan pendekatan dekomposisi dan pengenalan pola.',
+        weeks: [1, 2, 3, 4],
+        aktivitas: 'Diskusi kelompok memecahkan teka-teki logika komputasi dan menyusun diagram alir langkah penyelesaian masalah sehari-hari.',
+        questions: [
+          { q: 'Proses memecah masalah kompleks menjadi bagian-bagian kecil yang lebih mudah dikelola disebut...', options: ['Abstraksi', 'Dekomposisi', 'Pengenalan Pola', 'Algoritma'], ans: 'B', level: 'C2' },
+          { q: 'Urutan langkah-langkah logis dan sistematis untuk menyelesaikan suatu masalah disebut...', options: ['Program', 'Struktur Data', 'Algoritma', 'Deklarasi'], ans: 'C', level: 'C2' },
+          { q: 'Menyaring informasi yang tidak relevan dan fokus pada informasi penting dalam penyelesaian masalah merupakan prinsip...', options: ['Abstraksi', 'Dekomposisi', 'Iterasi', 'Kompilasi'], ans: 'A', level: 'C3' }
+        ],
+        essay: 'Jelaskan bagaimana kamu menerapkan prinsip dekomposisi saat merencanakan acara kegiatan kelas!'
+      },
+      {
+        id: 'tp2',
+        code: '7.2',
+        title: 'Literasi Digital & Pemanfaatan Perkakas Teknologi',
+        jp: 10,
+        materi: 'Mesin Pencari, Evaluasi Informasi Digital, Etika Siber, & Kolaborasi Daring',
+        indikator: 'Peserta didik mampu mencari informasi secara akurat menggunakan kata kunci efektif, memverifikasi kredibilitas berita, dan menjaga keamanan data pribadi.',
+        weeks: [5, 6, 7, 8],
+        aktivitas: 'Praktik pencarian informasi menggunakan sintaks khusus mesin pencari serta analisis studi kasus hoaks dan keamanan kata sandi.',
+        questions: [
+          { q: 'Untuk mencari dokumen berformat PDF secara spesifik di mesin pencari Google, sintaks yang tepat adalah...', options: ['type:pdf', 'filetype:pdf', 'doc:pdf', 'search:pdf'], ans: 'B', level: 'C3' },
+          { q: 'Tindakan memverifikasi kebenaran berita dengan membandingkan beberapa sumber terpercaya disebut...', options: ['Lateral Reading', 'Skimming', 'Phishing', 'Broadcasting'], ans: 'A', level: 'C2' },
+          { q: 'Manakah di bawah ini contoh kata sandi (password) yang paling kuat dan aman?', options: ['tanggalLahir123', 'admin12345', 'K0mput3r#Smp3!', 'namasaya2026'], ans: 'C', level: 'C3' }
+        ],
+        essay: 'Sebutkan 3 ciri informasi palsu (hoaks) di media sosial dan langkah pencegahannya!'
+      },
+      {
+        id: 'tp3',
+        code: '7.3',
+        title: 'Jaringan Komputer dan Internet (LAN, MAN, WAN, PAN)',
+        jp: 8,
+        materi: 'Klasifikasi Jaringan Berdasarkan Jangkauan Geografis (PAN, LAN, MAN, WAN) & Koneksi Internet',
+        indikator: 'Peserta didik mampu mengidentifikasi dan membedakan karakteristik jaringan PAN, LAN, MAN, dan WAN beserta penerapannya di lingkungan sekolah dan masyarakat.',
+        weeks: [9, 10, 11],
+        aktivitas: 'Observasi topologi jaringan laboratorium komputer sekolah, simulasi tethering/Bluetooth (PAN), dan pemetaan jangkauan jaringan.',
+        questions: [
+          { q: 'Jaringan komputer yang hanya mencakup area sangat dekat seperti menghubungkan smartphone dengan headset Bluetooth disebut...', options: ['LAN (Local Area Network)', 'PAN (Personal Area Network)', 'MAN (Metropolitan Area Network)', 'WAN (Wide Area Network)'], ans: 'B', level: 'C2' },
+          { q: 'Jaringan komputer yang menghubungkan komputer-komputer di dalam satu ruang laboratorium sekolah atau satu gedung disebut...', options: ['PAN', 'LAN', 'MAN', 'WAN'], ans: 'B', level: 'C2' },
+          { q: 'Urutan jenis jaringan komputer dari jangkauan geografis terkecil hingga terbesar yang benar adalah...', options: ['LAN - PAN - MAN - WAN', 'PAN - LAN - MAN - WAN', 'PAN - MAN - LAN - WAN', 'WAN - MAN - LAN - PAN'], ans: 'B', level: 'C3' }
+        ],
+        essay: 'Jelaskan perbedaan mendasar antara jaringan LAN dan WAN beserta masing-masing satu contoh penerapannya!'
+      },
+      {
+        id: 'tp4',
+        code: '7.4',
+        title: 'Analisis Data dan Pengolahan Lembar Kerja',
+        jp: 14,
+        materi: 'Pengumpulan Data, Tabel, Fungsi Statistik Dasar (SUM, AVERAGE, MAX, MIN), dan Visualisasi Grafik',
+        indikator: 'Peserta didik mampu mengolah data numerik menggunakan aplikasi lembar kerja (spreadsheet) dan menyajikannya dalam bentuk grafik yang informatif.',
+        weeks: [12, 13, 14, 15, 16],
+        aktivitas: 'Praktik mengolah data nilai dan tinggi badan teman sekelas menggunakan fungsi rumus lembar kerja serta membuat diagram batang.',
+        questions: [
+          { q: 'Fungsi pada aplikasi lembar kerja (spreadsheet) yang digunakan untuk menghitung nilai rata-rata dari sekumpulan data adalah...', options: ['=SUM()', '=COUNT()', '=AVERAGE()', '=MAX()'], ans: 'C', level: 'C2' },
+          { q: 'Pertemuan antara baris (row) dan kolom (column) pada lembar kerja disebut...', options: ['Range', 'Cell (Sel)', 'Sheet', 'Formula'], ans: 'B', level: 'C1' },
+          { q: 'Jika sel A1 berisi angka 10 dan B1 berisi angka 20, maka hasil dari rumus =SUM(A1:B1) adalah...', options: ['15', '20', '30', '200'], ans: 'C', level: 'C3' }
+        ],
+        essay: 'Mengapa penyajian data dalam bentuk grafik/diagram seringkali lebih mudah dipahami dibandingkan tabel angka biasa?'
+      }
+    ]
+  },
+  Matematika: {
+    fase: 'Fase D',
+    cp: 'Pada akhir Fase D, peserta didik dapat membaca, menulis, dan membandingkan bilangan bulat, bilangan rasional dan irasional, bilangan desimal. Mereka dapat menerapkan operasi aritmetika pada bilangan riil, memberikan estimasi/perkiraan dalam menyelesaikan masalah berkaitan dengan literasi finansial, menggunakan rasio dan proporsi, serta mengenali, memprediksi dan menggeneralisasi pola dalam bentuk susunan benda dan bentuk aljabar.',
+    tps: [
+      {
+        id: 'tp1',
+        code: '7.1',
+        title: 'Operasi bilangan bulat',
+        jp: 12,
+        materi: 'Bilangan Bulat Positif dan Negatif, Garis Bilangan, Operasi Hitung Campuran, KPK dan FPB',
+        indikator: 'Peserta didik mampu membandingkan dan melakukan operasi hitung campuran bilangan bulat serta menyelesaikan masalah kontekstual.',
+        weeks: [1, 2, 3, 4],
+        aktivitas: 'Eksplorasi konsep suhu dan ketinggian menggunakan garis bilangan serta diskusi kelompok pemecahan masalah operasi bilangan bulat.',
+        questions: [
+          { q: 'Hasil dari operasi hitung (-15) + 28 - (-12) adalah...', options: ['1', '25', '-25', '55'], ans: 'B', level: 'C2' },
+          { q: 'Suhu di dalam kulkas semula -4°C. Saat listrik padam, suhu naik 3°C setiap 10 menit. Berapa suhu kulkas setelah padam selama 30 menit?', options: ['5°C', '8°C', '9°C', '13°C'], ans: 'A', level: 'C3' },
+          { q: 'Hasil dari (-8) × 6 : (-4) adalah...', options: ['-12', '12', '-16', '16'], ans: 'B', level: 'C2' }
+        ],
+        essay: 'Dalam sebuah kompetisi matematika, jawaban benar diberi skor 4, salah -2, dan tidak dijawab -1. Jika dari 40 soal Budi menjawab benar 28 soal dan salah 7 soal, tentukan total skor Budi!'
+      },
+      {
+        id: 'tp2',
+        code: '7.2',
+        title: 'Pecahan dan desimal',
+        jp: 10,
+        materi: 'Bentuk Pecahan, Desimal, Persen, dan Operasi Hitung Bilangan Rasional',
+        indikator: 'Peserta didik mampu mengubah bentuk pecahan ke desimal/persen dan menyelesaikan operasi hitung pecahan dalam kehidupan sehari-hari.',
+        weeks: [5, 6, 7, 8],
+        aktivitas: 'Diskusi kelompok memodelkan pembagian kue/kertas lipat dan latihan soal konversi pecahan ke bentuk desimal.',
+        questions: [
+          { q: 'Bentuk desimal dari pecahan 3/8 adalah...', options: ['0,325', '0,375', '0,625', '0,875'], ans: 'B', level: 'C2' },
+          { q: 'Hasil dari 2 1/4 + 1,5 - 3/4 adalah...', options: ['2,5', '3,0', '3,25', '3,5'], ans: 'B', level: 'C3' },
+          { q: 'Ibu memiliki 12,5 kg tepung terigu yang akan dimasukkan ke dalam kantong plastik berukuran 1/4 kg. Banyak kantong plastik yang dibutuhkan adalah...', options: ['25 kantong', '40 kantong', '50 kantong', '60 kantong'], ans: 'C', level: 'C3' }
+        ],
+        essay: 'Sebuah lahan seluas 600 m² akan ditanami jagung 1/3 bagian, kacang tanah 2/5 bagian, dan sisanya dibuat kolam ikan. Hitunglah luas kolam ikan tersebut!'
+      },
+      {
+        id: 'tp3',
+        code: '7.3',
+        title: 'Rasio dan proporsi',
+        jp: 8,
+        materi: 'Konsep Rasio, Skala Peta, Perbandingan Senilai, dan Perbandingan Berbalik Nilai',
+        indikator: 'Peserta didik mampu membedakan dan menyelesaikan permasalahan perbandingan senilai dan berbalik nilai serta skala.',
+        weeks: [9, 10, 11],
+        aktivitas: 'Mengukur denah ruang kelas untuk menghitung skala dan menganalisis tabel perbandingan senilai serta berbalik nilai.',
+        questions: [
+          { q: 'Rasio paling sederhana dari 45 menit terhadap 1,5 jam adalah...', options: ['1 : 2', '1 : 3', '2 : 3', '3 : 4'], ans: 'A', level: 'C2' },
+          { q: 'Jarak dua kota pada peta adalah 6 cm. Jika skala peta 1 : 1.500.000, maka jarak sebenarnya kedua kota tersebut adalah...', options: ['9 km', '45 km', '90 km', '900 km'], ans: 'C', level: 'C3' },
+          { q: 'Suatu pekerjaan dapat diselesaikan oleh 12 pekerja dalam waktu 20 hari. Jika ingin diselesaikan dalam 15 hari, banyak pekerja tambahan yang diperlukan adalah...', options: ['3 orang', '4 orang', '6 orang', '16 orang'], ans: 'B', level: 'C4' }
+        ],
+        essay: 'Sebuah mobil membutuhkan 5 liter bensin untuk menempuh jarak 60 km. Berapa liter bensin yang dibutuhkan untuk menempuh jarak 156 km?'
+      },
+      {
+        id: 'tp4',
+        code: '7.4',
+        title: 'Bentuk aljabar',
+        jp: 14,
+        materi: 'Unsur Bentuk Aljabar (Variabel, Koefisien, Konstanta, Suku), Operasi Penjumlahan, Pengurangan, dan Perkalian Aljabar',
+        indikator: 'Peserta didik mampu menyatakan kuantitas yang berubah-ubah ke dalam bentuk aljabar dan melakukan operasi aljabar.',
+        weeks: [12, 13, 14, 15, 16],
+        aktivitas: 'Memodelkan banyak barang dalam kotak menggunakan variabel dan menyederhanakan suku-suku sejenis.',
+        questions: [
+          { q: 'Bentuk sederhana dari 5x - 3y + 7 - 2x + 6y - 4 adalah...', options: ['3x + 3y + 3', '3x - 9y + 3', '7x + 3y + 3', '3x + 3y - 11'], ans: 'A', level: 'C2' },
+          { q: 'Koefisien dari variabel y pada bentuk aljabar 4x² - 7y + 9 adalah...', options: ['4', '7', '-7', '9'], ans: 'C', level: 'C1' },
+          { q: 'Hasil perkalian dari (2x + 3)(x - 4) adalah...', options: ['2x² - 5x - 12', '2x² + 5x - 12', '2x² - 11x - 12', '2x² - 5x + 12'], ans: 'A', level: 'C3' }
+        ],
+        essay: 'Sebuah persegi panjang memiliki ukuran panjang (3x + 2) cm dan lebar (2x - 1) cm. Nyatakan keliling persegi panjang tersebut dalam bentuk aljabar paling sederhana!'
+      }
+    ]
+  },
+  'Bahasa Indonesia': {
+    fase: 'Fase D',
+    cp: 'Peserta didik memiliki kemampuan berbahasa untuk berkomunikasi dan bernalar sesuai dengan tujuan, konteks sosial, dan akademis dalam memahami, mengolah, dan menginterpretasi informasi paparan tentang topik yang beragam dan karya sastra.',
+    tps: [
+      { id: 'tp1', code: '7.1', title: 'Teks Deskripsi', jp: 12, materi: 'Struktur dan Kebahasaan Teks Deskripsi Objek/Tempat', indikator: 'Menganalisis informasi dan menulis teks deskripsi secara runtut dan hidup.', weeks: [1, 2, 3, 4], aktivitas: 'Mengamati lingkungan sekolah dan menulis paragraf deskripsi.', questions: [{ q: 'Tujuan utama teks deskripsi adalah...', options: ['Menjelaskan langkah membuat sesuatu', 'Menggambarkan objek secara rinci sehingga pembaca seolah melihat langsung', 'Meyakinkan pembaca', 'Menceritakan kejadian masa lalu'], ans: 'B', level: 'C2' }], essay: 'Buatlah satu paragraf deskripsi tentang ruang kelasmu!' },
+      { id: 'tp2', code: '7.2', title: 'Puisi Rakyat dan Cerita Fantasi', jp: 10, materi: 'Pantun, Gurindam, Syair, dan Unsur Intrinsik Cerita Imajinasi', indikator: 'Mengidentifikasi ciri puisi rakyat dan mengkreasikan cerita fantasi.', weeks: [5, 6, 7, 8], aktivitas: 'Berbalas pantun dan menyusun kerangka cerita fantasi.', questions: [{ q: 'Sajak akhir pada pantun yang benar adalah...', options: ['a-a-a-a', 'a-b-a-b', 'a-a-b-b', 'a-b-b-a'], ans: 'B', level: 'C1' }], essay: 'Tuliskan satu bait pantun nasihat tentang pentingnya rajin belajar!' },
+      { id: 'tp3', code: '7.3', title: 'Teks Prosedur', jp: 8, materi: 'Ciri Kebahasaan Kalimat Perintah dan Struktur Teks Prosedur', indikator: 'Menyajikan langkah-langkah melakukan suatu kegiatan secara sistematis.', weeks: [9, 10, 11], aktivitas: 'Praktik mendemonstrasikan teks prosedur di depan kelas.', questions: [{ q: 'Kalimat "Masukkan dua sendok gula ke dalam gelas!" merupakan jenis kalimat...', options: ['Deklaratif', 'Interogatif', 'Imperatif', 'Persuasif'], ans: 'C', level: 'C2' }], essay: 'Jelaskan struktur teks prosedur secara berurutan!' },
+      { id: 'tp4', code: '7.4', title: 'Teks Laporan Hasil Observasi', jp: 14, materi: 'Fakta dan Opini, Struktur Definisi Umum dan Deskripsi Bagian', indikator: 'Menyusun laporan hasil observasi secara objektif dan faktual.', weeks: [12, 13, 14, 15, 16], aktivitas: 'Observasi tanaman di taman sekolah dan menyusun laporan.', questions: [{ q: 'Teks Laporan Hasil Observasi harus bersifat objektif, artinya...', options: ['Sesuai pendapat pribadi penulis', 'Sesuai fakta dan data sebenarnya di lapangan', 'Menggunakan bahasa kiasan', 'Berisi cerita rekaan'], ans: 'B', level: 'C2' }], essay: 'Apa perbedaan antara kalimat fakta dan kalimat opini?' }
+    ]
+  },
+  IPA: {
+    fase: 'Fase D',
+    cp: 'Peserta didik mampu melakukan pengukuran terhadap aspek fisis yang mereka temui dan memanfaatkan ragam gerak dan gaya, memahami karakteristik zat serta perubahan fisika dan kimia, serta mengidentifikasi interaksi antar makhluk hidup dan lingkungannya.',
+    tps: [
+      { id: 'tp1', code: '7.1', title: 'Hakikat Ilmu Sains dan Metode Ilmiah', jp: 12, materi: 'Besaran Pokok, Besaran Turunan, Satuan SI, dan Alat Ukur', indikator: 'Melakukan pengukuran besaran fisis menggunakan alat ukur baku dengan tepat.', weeks: [1, 2, 3, 4], aktivitas: 'Praktikum mengukur panjang, massa, dan waktu di laboratorium.', questions: [{ q: 'Manakah di bawah ini yang termasuk kelompok besaran pokok?', options: ['Panjang, Luas, Volume', 'Panjang, Massa, Waktu', 'Kecepatan, Gaya, Usaha', 'Massa, Berat, Suhu'], ans: 'B', level: 'C2' }], essay: 'Sebutkan tahapan-tahapan dalam metode ilmiah secara berurutan!' },
+      { id: 'tp2', code: '7.2', title: 'Zat dan Perubahannya', jp: 10, materi: 'Wujud Zat, Massa Jenis, Perubahan Fisika dan Perubahan Kimia', indikator: 'Membedakan karakteristik wujud zat serta mengidentifikasi perubahan fisika dan kimia.', weeks: [5, 6, 7, 8], aktivitas: 'Percobaan mengamati es mencair dan kertas terbakar.', questions: [{ q: 'Peristiwa berikut yang merupakan perubahan kimia adalah...', options: ['Air membeku menjadi es', 'Besi berkarat', 'Lilin meleleh', 'Gula larut dalam air'], ans: 'B', level: 'C2' }], essay: 'Jelaskan perbedaan perubahan fisika dan perubahan kimia beserta contohnya!' },
+      { id: 'tp3', code: '7.3', title: 'Suhu, Kalor, dan Pemuaian', jp: 8, materi: 'Konversi Skala Termometer, Kalor, Konduksi, Konveksi, dan Radiasi', indikator: 'Menganalisis pengaruh kalor terhadap perubahan suhu dan wujud benda.', weeks: [9, 10, 11], aktivitas: 'Mengukur suhu air hangat dan mengamati perpindahan kalor.', questions: [{ q: 'Perpindahan kalor melalui zat perantara tanpa disertai perpindahan partikel zat tersebut dinamakan...', options: ['Konduksi', 'Konveksi', 'Radiasi', 'Evaporasi'], ans: 'A', level: 'C2' }], essay: 'Mengapa pemasangan kabel listrik di pinggir jalan dibuat agak kendur?' },
+      { id: 'tp4', code: '7.4', title: 'Klasifikasi Makhluk Hidup dan Ekosistem', jp: 14, materi: 'Ciri Makhluk Hidup, Kunci Determinasi, dan Jaring-jaring Makanan', indikator: 'Mengklasifikasikan makhluk hidup dan menganalisis interaksi komponen ekosistem.', weeks: [12, 13, 14, 15, 16], aktivitas: 'Observasi komponen biotik dan abiotik di halaman sekolah.', questions: [{ q: 'Komponen biotik yang berperan sebagai produsen dalam ekosistem darat adalah...', options: ['Jamur', 'Tumbuhan hijau', 'Belalang', 'Bakteri pengurai'], ans: 'B', level: 'C1' }], essay: 'Apa yang terjadi pada ekosistem sawah jika populasi ular menurun drastis?' }
+    ]
+  },
+  IPS: {
+    fase: 'Fase D',
+    cp: 'Peserta didik memahami keberagaman kondisi geografis Indonesia, konektivitas antarruang, interaksi sosial, lembaga sosial, serta aktivitas ekonomi masyarakat dalam memenuhi kebutuhan hidup secara berkelanjutan.',
+    tps: [
+      { id: 'tp1', code: '7.1', title: 'Keluarga Awal Kehidupan & Lokasi Geografis', jp: 12, materi: 'Sejarah Keluarga, Peta, Letak Astronomis dan Geografis Indonesia', indikator: 'Membaca peta dan menganalisis pengaruh letak geografis terhadap kehidupan sosial.', weeks: [1, 2, 3, 4], aktivitas: 'Mengamati peta Indonesia dan diskusi kelompok konektivitas antarruang.', questions: [{ q: 'Garis khayal pada peta yang membagi bumi menjadi belahan utara dan selatan disebut...', options: ['Garis Bujur', 'Garis Khatulistiwa (Lintang 0°)', 'Garis Meridian', 'Garis Balik'], ans: 'B', level: 'C2' }], essay: 'Jelaskan keuntungan letak geografis Indonesia di jalur perdagangan dunia!' },
+      { id: 'tp2', code: '7.2', title: 'Interaksi Sosial dan Lembaga Sosial', jp: 10, materi: 'Syarat Interaksi Sosial, Bentuk Asosiatif & Disosiatif, Lembaga Sosial', indikator: 'Mengidentifikasi bentuk interaksi sosial dan peran lembaga sosial di masyarakat.', weeks: [5, 6, 7, 8], aktivitas: 'Studi kasus bentuk kerja sama dan akomodasi di lingkungan sekolah.', questions: [{ q: 'Syarat terjadinya interaksi sosial adalah adanya...', options: ['Kontak sosial dan komunikasi', 'Kekayaan dan jabatan', 'Persaingan dan pertentangan', 'Kelompok dan individu'], ans: 'A', level: 'C2' }], essay: 'Sebutkan 3 contoh interaksi sosial asosiatif di lingkungan sekolah!' },
+      { id: 'tp3', code: '7.3', title: 'Kebutuhan Manusia dan Kelangkaan Sumber Daya', jp: 8, materi: 'Jenis Kebutuhan, Alat Pemuas Kebutuhan, dan Prinsip Ekonomi', indikator: 'Menganalisis skala prioritas kebutuhan dan solusi mengatasi kelangkaan.', weeks: [9, 10, 11], aktivitas: 'Menyusun daftar skala prioritas keuangan pelajar.', questions: [{ q: 'Kebutuhan akan makanan, pakaian, dan tempat tinggal berdasarkan intensitasnya termasuk kebutuhan...', options: ['Primer', 'Sekunder', 'Tersier', 'Rohani'], ans: 'A', level: 'C1' }], essay: 'Bagaimana cara menyusun skala prioritas kebutuhan bagi seorang pelajar?' },
+      { id: 'tp4', code: '7.4', title: 'Pemberdayaan Masyarakat & Literasi Finansial', jp: 14, materi: 'Uang, Pendapatan, Tabungan, dan Keberagaman Sosial Budaya', indikator: 'Memahami pengelolaan keuangan sederhana dan pelestarian budaya lokal.', weeks: [12, 13, 14, 15, 16], aktivitas: 'Simulasi perencanaan tabungan dan pameran budaya daerah.', questions: [{ q: 'Fungsi asli uang dalam kegiatan ekonomi adalah sebagai...', options: ['Alat tukar dan satuan hitung', 'Alat penimbun kekayaan', 'Komoditas perdagangan', 'Penunjuk status sosial'], ans: 'A', level: 'C2' }], essay: 'Mengapa literasi finansial penting dimiliki sejak usia SMP?' }
+    ]
+  },
+  'Bahasa Inggris': {
+    fase: 'Fase D',
+    cp: 'Peserta didik menggunakan teks lisan, tulisan, dan visual dalam bahasa Inggris untuk berinteraksi dan berkomunikasi dalam konteks yang beragam baik formal maupun informal.',
+    tps: [
+      { id: 'tp1', code: '7.1', title: 'Greetings, Self-Introduction & Pronouns', jp: 12, materi: 'Expressions of Greeting, Introducing Oneself and Others', indikator: 'Memperkenalkan diri dan orang lain dengan pelafalan dan struktur kalimat yang tepat.', weeks: [1, 2, 3, 4], aktivitas: 'Role-play perkenalan diri di depan kelas secara berpasangan.', questions: [{ q: 'Rina: "Hello, my name is Rina. Nice to meet you." Budi: "..."', options: ['See you later', 'Nice to meet you too', 'I am sorry', 'Good night'], ans: 'B', level: 'C2' }], essay: 'Write a short paragraph (4-5 sentences) introducing yourself and your hobby!' },
+      { id: 'tp2', code: '7.2', title: 'Culinary and Me (Describing Favorite Food)', jp: 10, materi: 'Adjectives, Taste & Texture of Food, Simple Present Tense', indikator: 'Mendeskripsikan makanan dan minuman favorit serta menanyakan kesukaan teman.', weeks: [5, 6, 7, 8], aktivitas: 'Wawancara teman sekelas tentang makanan tradisional favorit.', questions: [{ q: 'Rujak has a spicy and sour taste. The word "spicy" in Indonesian means...', options: ['Manis', 'Asin', 'Pedas', 'Pahit'], ans: 'C', level: 'C1' }], essay: 'Describe your favorite Indonesian food in 3 sentences!' },
+      { id: 'tp3', code: '7.3', title: 'Home Sweet Home (Rooms & Things in the House)', jp: 8, materi: 'Prepositions of Place, There is / There are, Household Chores', indikator: 'Mendeskripsikan ruangan di rumah dan aktivitas kebersihan sehari-hari.', weeks: [9, 10, 11], aktivitas: 'Menggambar denah kamar tidur dan mendeskripsikannya dalam bahasa Inggris.', questions: [{ q: 'My mother cooks delicious meals in the...', options: ['Bedroom', 'Kitchen', 'Bathroom', 'Garage'], ans: 'B', level: 'C1' }], essay: 'Mention 3 daily chores you do to keep your house clean!' },
+      { id: 'tp4', code: '7.4', title: 'My School Activities & Class Schedule', jp: 14, materi: 'Telling Time, Days of the Week, School Subjects & Extracurriculars', indikator: 'Menyusun dan menjelaskan jadwal pelajaran serta kegiatan ekstrakurikuler.', weeks: [12, 13, 14, 15, 16], aktivitas: 'Membuat poster jadwal pelajaran kelas dalam bahasa Inggris.', questions: [{ q: 'We have Flag Ceremony every ... morning at school.', options: ['Sunday', 'Monday', 'Friday', 'Saturday'], ans: 'B', level: 'C1' }], essay: 'What is your favorite subject at school and why do you like it?' }
+    ]
+  },
+  PPKn: {
+    fase: 'Fase D',
+    cp: 'Peserta didik mampu menganalisis kronologis lahirnya Pancasila, menerapkan nilai-nilai Pancasila dalam kehidupan sehari-hari, memahami norma dan UUD NRI Tahun 1945, serta menjaga keutuhan NKRI dan Bhinneka Tunggal Ika.',
+    tps: [
+      { id: 'tp1', code: '7.1', title: 'Sejarah Kelahiran Pancasila', jp: 12, materi: 'Sidang BPUPKI, Rumusan Dasar Negara, Panitia Sembilan, dan Penetapan Pancasila', indikator: 'Menjelaskan proses perumusan dan penetapan Pancasila sebagai dasar negara.', weeks: [1, 2, 3, 4], aktivitas: 'Diskusi kelompok meneladani semangat tokoh perumus dasar negara.', questions: [{ q: 'Badan yang dibentuk untuk mempersiapkan kemerdekaan Indonesia dan merumuskan dasar negara adalah...', options: ['PPKI', 'BPUPKI', 'KNIP', 'PETA'], ans: 'B', level: 'C1' }], essay: 'Sebutkan 3 tokoh yang mengusulkan rumusan dasar negara pada sidang pertama BPUPKI!' },
+      { id: 'tp2', code: '7.2', title: 'Norma dan UUD NRI Tahun 1945', jp: 10, materi: 'Norma Agama, Kesusilaan, Kesopanan, dan Norma Hukum', indikator: 'Menerapkan berbagai norma yang berlaku di lingkungan sekolah dan masyarakat.', weeks: [5, 6, 7, 8], aktivitas: 'Observasi kepatuhan tata tertib sekolah dan analisis studi kasus norma.', questions: [{ q: 'Norma yang bersumber dari hati nurani manusia dan menghasilkan rasa penyesalan jika dilanggar adalah...', options: ['Norma Hukum', 'Norma Kesusilaan', 'Norma Kesopanan', 'Norma Adat'], ans: 'B', level: 'C2' }], essay: 'Mengapa aturan atau tata tertib sangat diperlukan di lingkungan sekolah?' },
+      { id: 'tp3', code: '7.3', title: 'Kesatuan Indonesia dan Karakteristik Daerah', jp: 8, materi: 'Wilayah NKRI, Otonomi Daerah, dan Persatuan dalam Keberagaman', indikator: 'Menunjukkan sikap menjaga keutuhan wilayah NKRI dari lingkungan terdekat.', weeks: [9, 10, 11], aktivitas: 'Pemetaan ciri khas daerah di Indonesia dan komitmen persatuan.', questions: [{ q: 'Bentuk negara Indonesia sesuai Pasal 1 Ayat 1 UUD NRI Tahun 1945 adalah...', options: ['Serikat', 'Kesatuan yang berbentuk Republik', 'Monarki', 'Federasi'], ans: 'B', level: 'C1' }], essay: 'Bagaimana wujud nyata peran pelajar dalam menjaga keutuhan NKRI?' },
+      { id: 'tp4', code: '7.4', title: 'Kebinekaan Indonesia & Gotong Royong', jp: 14, materi: 'Keberagaman Suku, Agama, Ras, Antargolongan, dan Budaya Gotong Royong', indikator: 'Mempraktikkan toleransi dan kerja sama gotong royong di sekolah.', weeks: [12, 13, 14, 15, 16], aktivitas: 'Proyek aksi nyata kebersihan dan gotong royong lintas kelompok di kelas.', questions: [{ q: 'Semboyan Bhinneka Tunggal Ika memiliki arti...', options: ['Bersatu kita teguh bercerai kita runtuh', 'Berbeda-beda tetapi tetap satu jua', 'Maju terus pantang mundur', 'Satu nusa satu bangsa'], ans: 'B', level: 'C1' }], essay: 'Berikan 3 contoh kegiatan gotong royong yang dapat dilakukan siswa di kelas!' }
+    ]
+  },
+  'Seni Budaya': {
+    fase: 'Fase D',
+    cp: 'Pada akhir Fase D, peserta didik mampu mengamati, mengenal, merekam, dan menuangkan pengalaman serta pengamatannya terhadap lingkungan, perasaan, atau empatinya secara visual dan musikal dengan menggunakan proporsi, gestur, ruang, unsur seni rupa maupun seni pertunjukan tradisi Nusantara.',
+    tps: [
+      {
+        id: 'tp1',
+        code: '7.1',
+        title: 'Menggambar Flora, Fauna, dan Alam Benda',
+        jp: 12,
+        materi: 'Unsur Seni Rupa (Titik, Garis, Bidang, Warna, Tekstur), Prinsip Komposisi, dan Teknik Arsir',
+        indikator: 'Peserta didik mampu mengidentifikasi unsur seni rupa dan menggambar bentuk objek flora, fauna, serta alam benda dengan proporsi yang tepat.',
+        weeks: [1, 2, 3, 4],
+        aktivitas: 'Observasi objek tumbuhan dan benda di sekitar sekolah serta praktik menggambar sketsa dengan teknik arsir gradasi.',
+        questions: [
+          { q: 'Unsur seni rupa paling dasar yang menjadi awal terbentuknya garis dan bidang adalah...', options: ['Tekstur', 'Titik', 'Gelap Terang', 'Ruang'], ans: 'B', level: 'C1' },
+          { q: 'Teknik menggambar dengan menggunakan garis-garis sejajar atau menyilang untuk menentukan gelap terang objek disebut teknik...', options: ['Dusel', 'Pointilis', 'Arsir', 'Aquarel'], ans: 'C', level: 'C2' },
+          { q: 'Keseimbangan, kesatuan, irama, dan proporsi dalam menggambar termasuk ke dalam...', options: ['Alat Seni Rupa', 'Prinsip Seni Rupa', 'Media Lukis', 'Jenis Kerajinan'], ans: 'B', level: 'C2' }
+        ],
+        essay: 'Jelaskan langkah-langkah menggambar flora atau alam benda agar menghasilkan proporsi dan pencahayaan (gelap-terang) yang baik!'
+      },
+      {
+        id: 'tp2',
+        code: '7.2',
+        title: 'Ragam Hias Nusantara pada Bahan Tekstil dan Kayu',
+        jp: 10,
+        materi: 'Motif Ragam Hias Geometris, Flora, Fauna, Figuratif, serta Motif Batik Khas Daerah',
+        indikator: 'Peserta didik mampu mendesain pola ragam hias daerah Nusantara dan menerapkannya pada media kertas atau tekstil.',
+        weeks: [5, 6, 7, 8],
+        aktivitas: 'Menggambar pola ragam hias geometris dan motif batik pesisir (seperti motif Paoman Indramayu) dengan teknik stilasi.',
+        questions: [
+          { q: 'Penggayaan atau pengubahan bentuk objek alam menjadi bentuk ornamen hiasan tanpa meninggalkan ciri aslinya disebut...', options: ['Stilasi', 'Realisme', 'Fotografi', 'Imitasi'], ans: 'A', level: 'C2' },
+          { q: 'Motif ragam hias yang menggunakan unsur garis lurus, lengkung, segitiga, dan lingkaran secara berulang disebut motif...', options: ['Figuratif', 'Geometris', 'Fauna', 'Kaligrafi'], ans: 'B', level: 'C2' },
+          { q: 'Motif batik khas pesisir Indramayu banyak dipengaruhi oleh unsur alam sekitar, terutama...', options: ['Pegunungan salju', 'Biota laut, flora, dan burung/merak', 'Gedung perkotaan', 'Mesin industri'], ans: 'B', level: 'C3' }
+        ],
+        essay: 'Apa fungsi penerapan ragam hias pada benda kerajinan tekstil atau kayu dalam budaya masyarakat Indonesia?'
+      },
+      {
+        id: 'tp3',
+        code: '7.3',
+        title: 'Teknik Vokal dan Bernyanyi Secara Unisono',
+        jp: 8,
+        materi: 'Artikulasi, Phrasering, Intonasi, Pernapasan Diafragma, dan Lagu Daerah Nusantara',
+        indikator: 'Peserta didik mampu menyanyikan lagu daerah dan lagu nasional secara unisono (satu suara) dengan intonasi dan artikulasi yang benar.',
+        weeks: [9, 10, 11],
+        aktivitas: 'Latihan olah vokal pernapasan diafragma dan praktik menyanyikan lagu daerah secara berkelompok.',
+        questions: [
+          { q: 'Bernyanyi secara berkelompok dengan menggunakan satu suara atau satu melodi pokok disebut...', options: ['Kanon', 'Akappela', 'Unisono', 'Paduan Suara Campuran'], ans: 'C', level: 'C1' },
+          { q: 'Cara pengucapan kata demi kata yang baik dan jelas saat bernyanyi disebut...', options: ['Intonasi', 'Artikulasi', 'Phrasering', 'Resonansi'], ans: 'B', level: 'C2' },
+          { q: 'Teknik pernapasan yang paling dianjurkan dalam bernyanyi karena dapat menghasilkan suara yang stabil dan panjang adalah pernapasan...', options: ['Dada', 'Bahu', 'Diafragma', 'Mulut'], ans: 'C', level: 'C2' }
+        ],
+        essay: 'Jelaskan perbedaan antara artikulasi, intonasi, dan phrasering dalam teknik vokal!'
+      },
+      {
+        id: 'tp4',
+        code: '7.4',
+        title: 'Gerak Dasar Tari Tradisional Daerah',
+        jp: 14,
+        materi: 'Elemen Dasar Tari (Ruang, Waktu, Tenaga), Level Gerak, Pola Lantai, dan Apresiasi Tari Daerah',
+        indikator: 'Peserta didik mampu memperagakan gerak dasar tari tradisional sesuai iringan musik serta menerapkan pola lantai.',
+        weeks: [12, 13, 14, 15, 16],
+        aktivitas: 'Praktik eksplorasi elemen gerak tari (ruang, waktu, tenaga) dan peragaan gerak dasar tari tradisional daerah (seperti Tari Topeng Indramayu).',
+        questions: [
+          { q: 'Unsur utama dalam seni tari adalah...', options: ['Suara', 'Gerak tubuh yang ritmis dan estetis', 'Cahaya panggung', 'Dekorasi'], ans: 'B', level: 'C1' },
+          { q: 'Garis-garis di lantai yang dilalui oleh seorang penari atau formasi yang dibuat oleh kelompok penari disebut...', options: ['Level Tari', 'Pola Lantai', 'Tempo Tari', 'Properti Tari'], ans: 'B', level: 'C2' },
+          { q: 'Tari Topeng Kelana yang memiliki gerakan gagah, dinamis, dan ekspresif merupakan kesenian tradisional khas dari daerah...', options: ['Cirebon dan Indramayu', 'Sumatera Barat', 'Bali', 'Papua'], ans: 'A', level: 'C2' }
+        ],
+        essay: 'Jelaskan 3 elemen dasar gerak tari (Ruang, Waktu, dan Tenaga) beserta contohnya!'
+      }
+    ]
+  },
+  'B. Indramayu': {
+    fase: 'Fase D',
+    cp: 'Pada akhir Fase D, peserta didik mampu memahami, mengapresiasi, dan menggunakan Bahasa Indramayu (Basa Dermayon) sesuai unggah-ungguh basa (Ngoko/Bagongan dan Krama/Bebasan) dalam komunikasi sehari-hari, membaca dan menulis aksara Carakan Jawa/Pegon dasar, serta melestarikan sastra dan budaya lokal Indramayu.',
+    tps: [
+      {
+        id: 'tp1',
+        code: '7.1',
+        title: 'Unggah-Ungguh Basa Indramayu (Basa Bagongan lan Bebasan)',
+        jp: 12,
+        materi: 'Tingkatan Bahasa Indramayu (Ngoko/Bagongan lan Krama/Bebasan) dalam Percakapan Sehari-hari',
+        indikator: 'Peserta didik mampu menerapkan unggah-ungguh basa (Bebasan/Krama) saat berbicara dengan guru, orang tua, dan masyarakat dengan santun.',
+        weeks: [1, 2, 3, 4],
+        aktivitas: 'Praktik dialog berpasangan (pacelathon) menggunakan Basa Bebasan kepada guru dan orang tua.',
+        questions: [
+          { q: 'Tingkatan bahasa dalam Bahasa Indramayu yang digunakan untuk berbicara kepada orang yang lebih tua atau dihormati disebut...', options: ['Basa Bagongan', 'Basa Bebasan (Krama)', 'Basa Pergaulan', 'Basa Kasar'], ans: 'B', level: 'C1' },
+          { q: 'Bentuk Basa Bebasan (halus) dari kalimat "Kula arep mangan sekul" adalah...', options: ['Kula bade nedha sekul', 'Isun arep mangan sega', 'Kita pengen mangan sega', 'Kula arep dahar sega'], ans: 'A', level: 'C3' },
+          { q: 'Kata "Teka" (datang) jika diubah ke dalam Basa Bebasan Indramayu yang tepat menjadi...', options: ['Lunga', 'Rawuh / Dugi', 'Mangkat', 'Balik'], ans: 'B', level: 'C2' }
+        ],
+        essay: 'Ubahlah kalimat berikut ke dalam Basa Bebasan Indramayu yang santun: "Pak Guru wis teka ning sekolahan esuk-esuk"!'
+      },
+      {
+        id: 'tp2',
+        code: '7.2',
+        title: 'Teks Narasi Babad Dermayu lan Cerita Rakyat Indramayu',
+        jp: 10,
+        materi: 'Sejarah Raden Wiralodra, Nyi Endang Darma Ayu, dan Nilai Luhur Cerita Rakyat Indramayu',
+        indikator: 'Peserta didik mampu menceritakan kembali isi teks Babad Dermayu menggunakan bahasa sendiri dan meneladani pesan moralnya.',
+        weeks: [5, 6, 7, 8],
+        aktivitas: 'Membaca teks Babad Dermayu, diskusi kelompok nilai kepahlawanan Raden Wiralodra, dan presentasi lisan.',
+        questions: [
+          { q: 'Tokoh utama pembuka hutan di tepi Sungai Cimanuk yang menjadi pendiri Kabupaten Indramayu adalah...', options: ['Raden Kian Santang', 'Raden Aria Wiralodra', 'Pangeran Diponegoro', 'Sunan Kalijaga'], ans: 'B', level: 'C1' },
+          { q: 'Nama "Indramayu" (Darma Ayu) berasal dari nama seorang tokoh perempuan sakti dan berbudi luhur yaitu...', options: ['Nyi Roro Kidul', 'Nyi Endang Darma Ayu', 'Nyi Mas Gandasari', 'Dewi Sri'], ans: 'B', level: 'C1' },
+          { q: 'Senjata pusaka milik Raden Wiralodra yang terkenal dalam kisah Babad Dermayu adalah...', options: ['Keris Nogososro', 'Cakra Udaksana', 'Kujang Kembar', 'Tombak Kyai Plered'], ans: 'B', level: 'C2' }
+        ],
+        essay: 'Sebutkan 3 nilai keteladanan dari kisah perjuangan Raden Wiralodra dalam membangun pedukuhan Cimanuk (Indramayu)!'
+      },
+      {
+        id: 'tp3',
+        code: '7.3',
+        title: 'Sastra Lokal: Wangsalan, Parikan, lan Pribasa Dermayon',
+        jp: 8,
+        materi: 'Parikan (Pantun Dermayon), Wangsalan, dan Peribahasa Daerah Indramayu',
+        indikator: 'Peserta didik mampu mengidentifikasi makna parikan/wangsalan dan membuat parikan nasihat dalam Bahasa Indramayu.',
+        weeks: [9, 10, 11],
+        aktivitas: 'Menyusun dan membacakan parikan bertema semangat belajar serta sopan santun di depan kelas.',
+        questions: [
+          { q: 'Puisi lama dalam sastra Jawa/Indramayu yang terdiri dari sampiran dan isi (mirip pantun) disebut...', options: ['Parikan', 'Geguritan', 'Babad', 'Dongeng'], ans: 'A', level: 'C1' },
+          { q: 'Lanjutan isi yang tepat untuk parikan: "Tuku mangga ning Jatibarang, ..." adalah...', options: ['Ayo dolan sampe sore', 'Yen sinau aja kepalang (setengah-setengah)', 'Mangan krupuk pinggir kali', 'Turu sore tangi awan'], ans: 'B', level: 'C3' },
+          { q: 'Ungkapan "Adigang, adigung, adiguna" memiliki makna nasihat agar manusia tidak...', options: ['Rajin bekerja', 'Menyombongkan kekuatan, kekuasaan, dan kepandaiannya', 'Menolong sesama', 'Menghormati orang tua'], ans: 'B', level: 'C2' }
+        ],
+        essay: 'Buatlah satu bait Parikan Basa Indramayu (4 baris) dengan tema pentingnya menjaga kebersihan sekolah!'
+      },
+      {
+        id: 'tp4',
+        code: '7.4',
+        title: 'Aksara Carakan Jawa / Dermayon (Aksara Nglegena lan Sandhangan)',
+        jp: 14,
+        materi: '20 Aksara Carakan (Ha-Na-Ca-Ra-Ka) dan Sandhangan Swara (Wulu, Suku, Taling, Pepet, Taling Tarung)',
+        indikator: 'Peserta didik mampu membaca dan menyalin kata serta kalimat sederhana menggunakan Aksara Carakan dengan tepat.',
+        weeks: [12, 13, 14, 15, 16],
+        aktivitas: 'Latihan menulis 20 aksara dasar Carakan dan menyalin kata-kata dalam Bahasa Indramayu menggunakan sandhangan vokal.',
+        questions: [
+          { q: 'Urutan 5 aksara pertama dalam Carakan (Ha-Na-Ca-Ra-Ka) memiliki filosofi makna yaitu...', options: ['Ada utusan', 'Saling bertarung', 'Sama-sama kuat', 'Menjadi jenazah'], ans: 'A', level: 'C2' },
+          { q: 'Sandhangan swara dalam Aksara Carakan yang berfungsi mengubah bunyi vokal "a" menjadi "i" disebut...', options: ['Suku', 'Wulu', 'Pepet', 'Layar'], ans: 'B', level: 'C2' },
+          { q: 'Untuk mengubah bunyi aksara dasar menjadi vokal "u" (seperti pada kata "buku"), digunakan sandhangan...', options: ['Wulu', 'Suku', 'Taling', 'Wignyan'], ans: 'B', level: 'C2' }
+        ],
+        essay: 'Sebutkan 20 aksara dasar Carakan (Ha-Na-Ca-Ra-Ka) secara berurutan dalam 4 baris!'
+      }
+    ]
+  },
+  PJOK: {
+    fase: 'Fase D',
+    cp: 'Pada akhir Fase D, peserta didik dapat menunjukkan kemampuan dalam mempraktikkan hasil analisis keterampilan gerak spesifik berupa permainan dan olahraga, aktivitas senam, aktivitas gerak berirama, serta menerapkan konsep kebugaran jasmani dan pola perilaku hidup sehat.',
+    tps: [
+      {
+        id: 'tp1',
+        code: '7.1',
+        title: 'Permainan Invasi & Net (Sepak Bola, Bola Voli, Bola Basket)',
+        jp: 12,
+        materi: 'Gerak Spesifik Passing, Mengontrol Bola, Dribbling, Shooting, serta Servis Bawah dan Passing Bola Voli',
+        indikator: 'Peserta didik mampu mempraktikkan variasi gerak spesifik permainan bola besar serta menjunjung tinggi sportivitas dan kerja sama tim.',
+        weeks: [1, 2, 3, 4],
+        aktivitas: 'Pemanasan dinamis, latihan berpasangan passing kaki bagian dalam (sepak bola) serta passing bawah/atas bola voli di lapangan sekolah.',
+        questions: [
+          { q: 'Teknik menendang bola yang paling efektif digunakan untuk memberikan umpan jarak pendek secara akurat dalam sepak bola adalah menggunakan...', options: ['Ujung jari kaki', 'Kaki bagian dalam', 'Tumit kaki', 'Punggung kaki penuh'], ans: 'B', level: 'C2' },
+          { q: 'Gerakan memantul-mantulkan bola ke lantai sambil berjalan atau berlari dalam permainan bola basket disebut...', options: ['Passing', 'Shooting', 'Dribbling', 'Pivot'], ans: 'C', level: 'C1' },
+          { q: 'Pada permainan bola voli, pukulan pertama untuk memulai permainan dari belakang garis lapangan disebut...', options: ['Smash / Spike', 'Block', 'Servis', 'Passing atas'], ans: 'C', level: 'C1' }
+        ],
+        essay: 'Jelaskan posisi kedua lengan dan perkenaan bola yang benar saat melakukan gerakan passing bawah pada permainan bola voli!'
+      },
+      {
+        id: 'tp2',
+        code: '7.2',
+        title: 'Aktivitas Atletik (Jalan Cepat, Lari Jarak Pendek & Lompat Jauh)',
+        jp: 10,
+        materi: 'Teknik Start Jongkok (Crouch Start), Gerakan Lari Sprint, Memasuki Garis Finish, dan Tahapan Lompat Jauh',
+        indikator: 'Peserta didik mampu mempraktikkan teknik dasar start jongkok, lari jarak pendek (sprint), dan lompat jauh dengan koordinasi gerak yang baik.',
+        weeks: [5, 6, 7, 8],
+        aktivitas: 'Praktik aba-aba start jongkok ("Bersedia, Siap, Ya!"), lari cepat 60 meter, dan tahapan tolakan lompat jauh.',
+        questions: [
+          { q: 'Jenis start yang wajib digunakan oleh pelari pada nomor lari jarak pendek (sprint 100 m) adalah...', options: ['Start berdiri', 'Start melayang', 'Start jongkok (crouch start)', 'Start bebas'], ans: 'C', level: 'C1' },
+          { q: 'Urutan aba-aba yang benar dalam perlombaan lari jarak pendek adalah...', options: ['Siap - Bersedia - Mulai', 'Bersedia - Siap - Ya / Bunyi Pistol', 'Awas - Siap - Lari', 'Satu - Dua - Tiga'], ans: 'B', level: 'C2' },
+          { q: 'Empat tahapan gerakan dalam lompat jauh secara berurutan adalah...', options: ['Awalan - Tolakan - Melayang di udara - Mendarat', 'Tolakan - Awalan - Melayang - Mendarat', 'Awalan - Melayang - Tolakan - Mendarat', 'Lari - Loncat - Berputar - Berdiri'], ans: 'A', level: 'C2' }
+        ],
+        essay: 'Apa perbedaan mendasar antara gerakan jalan cepat dengan gerakan lari dilihat dari kontak kaki dengan tanah?'
+      },
+      {
+        id: 'tp3',
+        code: '7.3',
+        title: 'Aktivitas Kebugaran Jasmani & Senam Lantai',
+        jp: 8,
+        materi: 'Latihan Kekuatan (Push-up, Sit-up, Back-up), Daya Tahan Jantung-Paru, Kelenturan, serta Guling Depan (Forward Roll)',
+        indikator: 'Peserta didik mampu melakukan latihan komponen kebugaran jasmani dan rangkaian gerak spesifik senam lantai dengan aman.',
+        weeks: [9, 10, 11],
+        aktivitas: 'Sirkuit training kebugaran jasmani (sit-up, push-up, shuttle run) dan praktik guling depan di atas matras.',
+        questions: [
+          { q: 'Kemampuan tubuh untuk melakukan aktivitas fisik sehari-hari tanpa mengalami kelelahan yang berlebihan disebut...', options: ['Kesehatan rohani', 'Kebugaran jasmani', 'Kekuatan otot', 'Kecepatan gerak'], ans: 'B', level: 'C1' },
+          { q: 'Bentuk latihan kebugaran jasmani yang bertujuan untuk melatih kekuatan otot perut adalah...', options: ['Push-up', 'Sit-up', 'Pull-up', 'Squat jump'], ans: 'B', level: 'C2' },
+          { q: 'Saat melakukan gerakan guling depan (forward roll) di atas matras, bagian tubuh yang pertama kali menyentuh matras setelah kedua tangan adalah...', options: ['Dahi kepala', 'Tengkuk (leher bagian belakang)', 'Punggung bawah', 'Bahu kanan'], ans: 'B', level: 'C3' }
+        ],
+        essay: 'Sebutkan 4 manfaat melakukan pemanasan (warming-up) sebelum berolahraga dan pendinginan (cooling-down) setelah berolahraga!'
+      },
+      {
+        id: 'tp4',
+        code: '7.4',
+        title: 'Pola Makan Sehat, Bergizi, dan Seimbang serta Budaya Hidup Sehat',
+        jp: 14,
+        materi: 'Zat Gizi Makanan (Karbohidrat, Protein, Lemak, Vitamin, Mineral), Gizi Seimbang Remaja, dan Pencegahan Pergaulan Tidak Sehat',
+        indikator: 'Peserta didik mampu menganalisis kebutuhan gizi harian remaja dan menerapkan perilaku hidup bersih dan sehat di sekolah maupun rumah.',
+        weeks: [12, 13, 14, 15, 16],
+        aktivitas: 'Menyusun menu makanan sehat "Isi Piringku" untuk remaja SMP dan kampanye poster pola hidup sehat.',
+        questions: [
+          { q: 'Zat gizi dalam makanan yang berfungsi utama sebagai pembangun sel-sel tubuh dan memperbaiki jaringan tubuh yang rusak adalah...', options: ['Karbohidrat', 'Protein', 'Vitamin', 'Air'], ans: 'B', level: 'C2' },
+          { q: 'Pedoman gizi seimbang yang dikeluarkan Kementerian Kesehatan RI sebagai pengganti slogan 4 Sehat 5 Sempurna dikenal dengan panduan...', options: ['Isi Piringku', 'Makan Kenyang', 'Diet Ketat', 'Kalori Harian'], ans: 'A', level: 'C1' },
+          { q: 'Kekurangan vitamin C dalam tubuh dapat menyebabkan gangguan kesehatan berupa...', options: ['Rabun senja', 'Sariawan dan gusi berdarah (Skorbut)', 'Tulang keropos', 'Anemia'], ans: 'B', level: 'C2' }
+        ],
+        essay: 'Jelaskan komponen apa saja yang harus ada dalam seporsi makan sehat sesuai panduan "Isi Piringku"!'
+      }
+    ]
+  }
+};
+
+const ROMBEL_GROUPS = {
+  VII: ['VII A', 'VII B', 'VII C', 'VII D', 'VII E', 'VII F'],
+  VIII: ['VIII A', 'VIII B', 'VIII C', 'VIII D', 'VIII E', 'VIII F'],
+  IX: ['IX A', 'IX B', 'IX C', 'IX D', 'IX E', 'IX F'],
+};
+
+// Helper untuk mendeteksi tingkat kelas (7, 8, atau 9) dari nama Rombel
+const getGradePrefixFromRombel = (rombelName = '') => {
+  const upper = rombelName.toUpperCase().trim();
+  if (upper.startsWith('IX') || upper.startsWith('9')) return '9';
+  if (upper.startsWith('VIII') || upper.startsWith('8')) return '8';
+  return '7';
+};
+
+// Helper menyesuaikan kode TP (7.1 / 8.1 / 9.1) dengan tingkat rombel aktif
+const adaptTpCodesToRombel = (tpList, rombelName) => {
+  const prefix = getGradePrefixFromRombel(rombelName);
+  return tpList.map((tp, idx) => {
+    const subNum = tp.code.includes('.') ? tp.code.split('.')[1] : idx + 1;
+    return {
+      ...tp,
+      code: `${prefix}.${subNum}`
+    };
+  });
+};
+
+const INITIAL_STUDENTS = [
+  { id: 1, name: 'Andi Pratama', nis: '262707001', attendance: 'H', tp1: 88, tp2: 92, tp3: 85, tp4: 87, sts: 86, sas: 90 },
+  { id: 2, name: 'Bunga Lestari', nis: '262707002', attendance: 'H', tp1: 78, tp2: 80, tp3: 68, tp4: 72, sts: 74, sas: 76 },
+  { id: 3, name: 'Candra Wibowo', nis: '262707003', attendance: 'H', tp1: 92, tp2: 90, tp3: 94, tp4: 96, sts: 92, sas: 94 },
+  { id: 4, name: 'Dewi Sartika', nis: '262707004', attendance: 'H', tp1: 81, tp2: 85, tp3: 82, tp4: 84, sts: 83, sas: 85 },
+  { id: 5, name: 'Eko Saputra', nis: '262707005', attendance: 'H', tp1: 86, tp2: 88, tp3: 84, tp4: 75, sts: 82, sas: 84 },
+];
+
+export default function App() {
+  // Navigation state
+  const [activeMenu, setActiveMenu] = useState('dashboard');
+  const [toastMsg, setToastMsg] = useState(null);
+
+  // 1. Data Kelas & Kop Sekolah State
+  const [classData, setClassData] = useState({
+    schoolName: 'UPTD SMPN 3 GABUSWETAN',
+    pemda: 'PEMERINTAH KABUPATEN INDRAMAYU',
+    dinas: 'DINAS PENDIDIKAN DAN KEBUDAYAAN',
+    address: 'Jl. Raya Gabuswetan, Kec. Gabuswetan, Kab. Indramayu',
+    teacherName: 'Guru Mata Pelajaran, S.Pd., Gr.',
+    teacherNip: '19900101 202012 1 001',
+    principalName: 'Kepala Sekolah, M.Pd.',
+    principalNip: '19750512 200501 1 004',
+    activeClass: 'VII A',
+    parallelClasses: ['VII A', 'VII B', 'VII C'],
+    subject: 'Matematika',
+    academicYear: '2026/2027',
+    semester: 'Ganjil',
+    fase: 'Fase D',
+    useSchoolHeader: true
+  });
+
+  // Rombel paralel modal state
+  const [showRombelModal, setShowRombelModal] = useState(false);
+  const [activeRombelTab, setActiveRombelTab] = useState('ALL'); // 'ALL' | 'VII' | 'VIII' | 'IX'
+  const [customRombelInput, setCustomRombelInput] = useState('');
+
+  // 2. CP & TP State
+  const [cpText, setCpText] = useState(SUBJECT_PRESETS['Matematika'].cp);
+  const [tps, setTps] = useState(SUBJECT_PRESETS['Matematika'].tps);
+  const [selectedTpId, setSelectedTpId] = useState('tp2'); // Default 7.2 like in video
+
+  // 3. Mode Harian (Presensi, Jurnal, Nilai)
+  const [dailyTab, setDailyTab] = useState('presensi'); // 'presensi' | 'jurnal' | 'nilai'
+  const [students, setStudents] = useState(INITIAL_STUDENTS);
+  const [newStudentName, setNewStudentName] = useState('');
+  const [journalDate, setJournalDate] = useState('Senin, 12 Oktober 2026');
+  const [journalMateri, setJournalMateri] = useState('Pecahan dan desimal');
+  const [journalActivity, setJournalActivity] = useState('Diskusi kelompok, latihan soal 1–5');
+  const [journals, setJournals] = useState([
+    { id: 1, date: 'Senin, 5 Oktober 2026', rombel: 'VII A', materi: 'Operasi bilangan bulat', activity: 'Eksplorasi garis bilangan dan kuis singkat', presentCount: '5/5 Hadir' },
+    { id: 2, date: 'Senin, 12 Oktober 2026', rombel: 'VII A', materi: 'Pecahan dan desimal', activity: 'Diskusi kelompok, latihan soal 1–5', presentCount: '5/5 Hadir' }
+  ]);
+
+  // 4. Ujian / Asesmen State
+  const [examType, setExamType] = useState('Asesmen Sumatif'); // 'Asesmen Sumatif' | 'Soal STS dan SAS'
+  const [examDocTab, setExamDocTab] = useState('kisi'); // 'kisi' | 'soal_kunci' | 'lembar_siswa'
+
+  // 5. Perangkat Ajar Sub-tab
+  const [perangkatType, setPerangkatType] = useState('modul'); // 'modul' | 'lkpd' | 'kuis'
+
+  // 6. Unduhan Status
+  const [downloadedDocs, setDownloadedDocs] = useState({});
+
+  // Helper Toast
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3200);
+  };
+
+  // Handle Subject Change -> Auto-populate CP & TP
+  const handleSubjectChange = (newSubject) => {
+    setClassData(prev => ({ ...prev, subject: newSubject }));
+    if (SUBJECT_PRESETS[newSubject]) {
+      setCpText(SUBJECT_PRESETS[newSubject].cp);
+      const adaptedTps = adaptTpCodesToRombel(SUBJECT_PRESETS[newSubject].tps, classData.activeClass);
+      setTps(adaptedTps);
+      setSelectedTpId(adaptedTps[0].id);
+      setJournalMateri(adaptedTps[0].title);
+      showToast(`CP, TP, Prota, Promes & Silabus ${newSubject} (${classData.activeClass}) otomatis disinkronkan!`);
+    }
+  };
+
+  // Handle Active Class / Rombel Switch -> Update Active Class & Adapt TP Prefix (7.x / 8.x / 9.x)
+  const handleActiveRombelChange = (rombelName) => {
+    setClassData(prev => {
+      const nextParallel = prev.parallelClasses.includes(rombelName)
+        ? prev.parallelClasses
+        : [...prev.parallelClasses, rombelName];
+      return { ...prev, activeClass: rombelName, parallelClasses: nextParallel };
+    });
+    setTps(prevTps => adaptTpCodesToRombel(prevTps, rombelName));
+    showToast(`Berpindah ke Rombel ${rombelName} (Kode TP disesuaikan ke Kelas ${getGradePrefixFromRombel(rombelName)})`);
+  };
+
+  // Toggle individual rombel in parallelClasses list
+  const toggleParallelRombel = (rombel) => {
+    setClassData(prev => {
+      const exists = prev.parallelClasses.includes(rombel);
+      if (exists && prev.parallelClasses.length === 1) {
+        showToast('Minimal harus ada 1 rombel yang aktif!');
+        return prev;
+      }
+      const nextList = exists
+        ? prev.parallelClasses.filter(r => r !== rombel)
+        : [...prev.parallelClasses, rombel];
+      const nextActive = nextList.includes(prev.activeClass) ? prev.activeClass : nextList[0];
+      setTps(currentTps => adaptTpCodesToRombel(currentTps, nextActive));
+      return { ...prev, parallelClasses: nextList, activeClass: nextActive };
+    });
+  };
+
+  // Toggle seluruh rombel pada satu jenjang (VII A-F / VIII A-F / IX A-F)
+  const toggleGradeGroupRombels = (gradeKey) => {
+    const groupRombels = ROMBEL_GROUPS[gradeKey] || [];
+    setClassData(prev => {
+      const allAlreadySelected = groupRombels.every(r => prev.parallelClasses.includes(r));
+      let nextList;
+      if (allAlreadySelected) {
+        const remaining = prev.parallelClasses.filter(r => !groupRombels.includes(r));
+        nextList = remaining.length > 0 ? remaining : [groupRombels[0]];
+      } else {
+        const merged = new Set([...prev.parallelClasses, ...groupRombels]);
+        nextList = Array.from(merged);
+      }
+      const nextActive = nextList.includes(prev.activeClass) ? prev.activeClass : nextList[0];
+      setTps(currentTps => adaptTpCodesToRombel(currentTps, nextActive));
+      return { ...prev, parallelClasses: nextList, activeClass: nextActive };
+    });
+    showToast(`Rombel paralel Kelas ${gradeKey} (A–F) berhasil diperbarui!`);
+  };
+
+  // Add custom rombel
+  const handleAddCustomRombel = () => {
+    const trimmed = customRombelInput.trim().toUpperCase();
+    if (!trimmed) return;
+    setClassData(prev => {
+      const nextList = prev.parallelClasses.includes(trimmed)
+        ? prev.parallelClasses
+        : [...prev.parallelClasses, trimmed];
+      return { ...prev, parallelClasses: nextList, activeClass: trimmed };
+    });
+    setTps(prevTps => adaptTpCodesToRombel(prevTps, trimmed));
+    setCustomRombelInput('');
+    showToast(`Rombel ${trimmed} berhasil ditambahkan & diaktifkan!`);
+  };
+
+  // Toggle Promes Week for a TP
+  const togglePromesWeek = (tpId, weekNum) => {
+    setTps(prev => prev.map(tp => {
+      if (tp.id !== tpId) return tp;
+      const exists = tp.weeks.includes(weekNum);
+      const updatedWeeks = exists
+        ? tp.weeks.filter(w => w !== weekNum)
+        : [...tp.weeks, weekNum].sort((a, b) => a - b);
+      return { ...tp, weeks: updatedWeeks, jp: Math.max(2, updatedWeeks.length * 2) };
+    }));
+  };
+
+  // Add new TP
+  const handleAddTp = () => {
+    const nextNum = tps.length + 1;
+    const gradePrefix = getGradePrefixFromRombel(classData.activeClass);
+    const newTp = {
+      id: `tp_${Date.now()}`,
+      code: `${gradePrefix}.${nextNum}`,
+      title: `Materi Pembelajaran Baru Bab ${nextNum}`,
+      jp: 6,
+      materi: `Pokok Bahasan Bab ${nextNum}`,
+      indikator: `Peserta didik mampu memahami dan menerapkan konsep Bab ${nextNum} dengan baik.`,
+      weeks: [Math.min(16, nextNum * 3)],
+      aktivitas: 'Diskusi kelompok, eksplorasi konsep, dan presentasi hasil kerja.',
+      questions: [
+        { q: `Pertanyaan evaluasi pemahaman konsep dasar materi ${gradePrefix}.${nextNum}...`, options: ['Pilihan A', 'Pilihan B', 'Pilihan C', 'Pilihan D'], ans: 'A', level: 'C2' }
+      ],
+      essay: `Jelaskan kesimpulan utama dari materi ${gradePrefix}.${nextNum} dengan bahasamu sendiri!`
+    };
+    setTps([...tps, newTp]);
+    showToast(`Tujuan Pembelajaran ${newTp.code} berhasil ditambahkan!`);
+  };
+
+  // Active TP Object
+  const selectedTp = useMemo(() => {
+    return tps.find(t => t.id === selectedTpId) || tps[0];
+  }, [tps, selectedTpId]);
+
+  // Calculate Student Final Grade & Dynamic Rapor Description
+  const studentsWithSummary = useMemo(() => {
+    return students.map(s => {
+      const scores = [
+        { tp: tps[0]?.title || 'Materi 1', val: Number(s.tp1) || 0 },
+        { tp: tps[1]?.title || 'Materi 2', val: Number(s.tp2) || 0 },
+        { tp: tps[2]?.title || 'Materi 3', val: Number(s.tp3) || 0 },
+        { tp: tps[3]?.title || 'Materi 4', val: Number(s.tp4) || 0 },
+      ];
+      const avgTp = scores.reduce((acc, cur) => acc + cur.val, 0) / scores.length;
+      const finalScore = Math.round((avgTp * 0.5) + (Number(s.sts || 0) * 0.25) + (Number(s.sas || 0) * 0.25));
+
+      const sorted = [...scores].sort((a, b) => b.val - a.val);
+      const highest = sorted[0];
+      const lowest = sorted[sorted.length - 1];
+
+      let desc = '';
+      if (finalScore >= 85) {
+        desc = `Ananda ${s.name} menunjukkan penguasaan yang sangat baik dalam ${highest.tp.toLowerCase()}, serta konsisten memahami ${lowest.tp.toLowerCase()}.`;
+      } else if (finalScore >= 78) {
+        desc = `Ananda ${s.name} menunjukkan penguasaan yang baik dalam ${highest.tp.toLowerCase()}, namun perlu penguatan lebih lanjut pada ${lowest.tp.toLowerCase()}.`;
+      } else {
+        desc = `Ananda ${s.name} cukup mampu memahami ${highest.tp.toLowerCase()}, namun perlu bimbingan intensif dalam ${lowest.tp.toLowerCase()}.`;
+      }
+
+      return { ...s, finalScore, highest, lowest, desc };
+    });
+  }, [students, tps]);
+
+  // ==========================================
+  // GENERATOR DOKUMEN MS WORD (.DOC) A4 ARIAL
+  // ==========================================
+  const generateWordDocument = (docType, customTitle) => {
+    const kopHtml = classData.useSchoolHeader ? `
+      <div style="text-align:center; border-bottom: 3px double #000; padding-bottom: 8px; margin-bottom: 16px; font-family: Arial, sans-serif; color: #000;">
+        <p style="margin:0; font-size:11pt; font-weight:bold;">${classData.pemda}</p>
+        <p style="margin:0; font-size:11pt; font-weight:bold;">${classData.dinas}</p>
+        <p style="margin:2px 0; font-size:14pt; font-weight:bold;">${classData.schoolName}</p>
+        <p style="margin:0; font-size:9pt;">${classData.address}</p>
+      </div>
+    ` : '';
+
+    const identityTableHtml = `
+      <table style="width:100%; margin-bottom:14px; font-family: Arial, sans-serif; font-size:10pt; border:none;">
+        <tr>
+          <td style="width:22%; font-weight:bold; padding:2px 0;">Satuan Pendidikan</td>
+          <td style="width:28%; padding:2px 0;">: ${classData.schoolName}</td>
+          <td style="width:22%; font-weight:bold; padding:2px 0;">Kelas / Fase</td>
+          <td style="width:28%; padding:2px 0;">: ${classData.activeClass} / ${classData.fase}</td>
+        </tr>
+        <tr>
+          <td style="font-weight:bold; padding:2px 0;">Mata Pelajaran</td>
+          <td style="padding:2px 0;">: ${classData.subject}</td>
+          <td style="font-weight:bold; padding:2px 0;">Tahun Ajaran</td>
+          <td style="padding:2px 0;">: ${classData.academicYear} (${classData.semester})</td>
+        </tr>
+      </table>
+    `;
+
+    const signatureHtml = `
+      <table style="width:100%; margin-top:30px; font-family: Arial, sans-serif; font-size:10pt; border:none; page-break-inside:avoid;">
+        <tr>
+          <td style="width:50%; text-align:center;">
+            Mengetahui,<br/>Kepala ${classData.schoolName}<br/><br/><br/><br/>
+            <b><u>${classData.principalName}</u></b><br/>
+            NIP. ${classData.principalNip}
+          </td>
+          <td style="width:50%; text-align:center;">
+            Indramayu, Juli 2026<br/>Guru Mata Pelajaran<br/><br/><br/><br/>
+            <b><u>${classData.teacherName}</u></b><br/>
+            NIP. ${classData.teacherNip}
+          </td>
+        </tr>
+      </table>
+    `;
+
+    let bodyContent = '';
+    const totalJp = tps.reduce((a, b) => a + Number(b.jp), 0);
+
+    if (docType === 'atp' || docType === 'prota' || docType === 'silabus') {
+      const docHeading = docType === 'atp'
+        ? 'ALUR TUJUAN PEMBELAJARAN (ATP)'
+        : docType === 'prota'
+        ? 'PROGRAM TAHUNAN (PROTA)'
+        : 'SILABUS PEMBELAJARAN KURIKULUM MERDEKA';
+
+      bodyContent = `
+        <h3 style="text-align:center; font-size:12pt; margin: 0 0 12px 0;">${docHeading}</h3>
+        ${identityTableHtml}
+        <p style="font-size:10pt; margin-bottom:8px;"><b>Capaian Pembelajaran (CP):</b><br/>${cpText}</p>
+        <table style="width:100%; border-collapse:collapse; font-size:10pt;" border="1" cellpadding="6">
+          <thead>
+            <tr style="background-color:#f0f0f0; font-weight:bold; text-align:center;">
+              <th style="width:8%;">Kode TP</th>
+              <th style="width:24%;">Tujuan Pembelajaran</th>
+              <th style="width:24%;">Materi Pokok</th>
+              <th style="width:28%;">Indikator / Aktivitas</th>
+              <th style="width:8%;">Semester</th>
+              <th style="width:8%;">Alokasi JP</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tps.map(tp => `
+              <tr>
+                <td style="text-align:center; font-weight:bold;">${tp.code}</td>
+                <td>Peserta didik mampu memahami dan menerapkan <b>${tp.title}</b></td>
+                <td>${tp.materi}</td>
+                <td>${tp.indikator}</td>
+                <td style="text-align:center;">${classData.semester}</td>
+                <td style="text-align:center; font-weight:bold;">${tp.jp} JP</td>
+              </tr>
+            `).join('')}
+            <tr style="font-weight:bold; background-color:#f9f9f9;">
+              <td colspan="5" style="text-align:right;">Total Jam Pelajaran Efektif</td>
+              <td style="text-align:center;">${totalJp} JP</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    } else if (docType === 'promes') {
+      const weeksArr = Array.from({ length: 16 }, (_, i) => i + 1);
+      bodyContent = `
+        <h3 style="text-align:center; font-size:12pt; margin: 0 0 12px 0;">PROGRAM SEMESTER (PROMES)</h3>
+        ${identityTableHtml}
+        <table style="width:100%; border-collapse:collapse; font-size:9pt;" border="1" cellpadding="4">
+          <thead>
+            <tr style="background-color:#f0f0f0; font-weight:bold; text-align:center;">
+              <th rowspan="2" style="width:8%;">Kode</th>
+              <th rowspan="2" style="width:26%;">Tujuan Pembelajaran</th>
+              <th rowspan="2" style="width:8%;">JP</th>
+              <th colspan="16">Minggu Efektif Semester ${classData.semester} (Juli - Desember)</th>
+            </tr>
+            <tr style="background-color:#f0f0f0; font-weight:bold; text-align:center;">
+              ${weeksArr.map(w => `<th>${w}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${tps.map(tp => `
+              <tr>
+                <td style="text-align:center; font-weight:bold;">${tp.code}</td>
+                <td>${tp.title}</td>
+                <td style="text-align:center; font-weight:bold;">${tp.jp} JP</td>
+                ${weeksArr.map(w => `<td style="text-align:center; background-color:${tp.weeks.includes(w) ? '#dbeafe' : '#ffffff'}; font-weight:bold;">${tp.weeks.includes(w) ? '✓' : ''}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else if (docType === 'modul') {
+      bodyContent = `
+        <h3 style="text-align:center; font-size:12pt; margin: 0 0 12px 0;">MODUL AJAR / RENCANA PELAKSANAAN PEMBELAJARAN (RPP)</h3>
+        ${identityTableHtml}
+        <table style="width:100%; border-collapse:collapse; font-size:10pt;" border="1" cellpadding="6">
+          <tr style="background-color:#f0f0f0; font-weight:bold;"><td colspan="2">A. KOMPONEN INTI PEMBELAJARAN</td></tr>
+          <tr><td style="width:28%; font-weight:bold;">Kode & Tujuan Pembelajaran</td><td><b>TP ${selectedTp.code}</b> — ${selectedTp.title}<br/>${selectedTp.indikator}</td></tr>
+          <tr><td style="font-weight:bold;">Materi Pokok</td><td>${selectedTp.materi}</td></tr>
+          <tr><td style="font-weight:bold;">Alokasi Waktu</td><td>${selectedTp.jp} Jam Pelajaran (Minggu ke-${selectedTp.weeks.join(', ')})</td></tr>
+          <tr><td style="font-weight:bold;">Model Pembelajaran</td><td>Discovery Learning & Problem Based Learning (Diskusi Kelompok)</td></tr>
+          <tr style="background-color:#f0f0f0; font-weight:bold;"><td colspan="2">B. LANGKAH-LANGKAH KEGIATAN PEMBELAJARAN</td></tr>
+          <tr>
+            <td style="font-weight:bold;">1. Kegiatan Pendahuluan (10 Menit)</td>
+            <td>
+              1. Guru membuka kelas dengan salam, doa bersama, dan memeriksa kehadiran peserta didik kelas ${classData.activeClass}.<br/>
+              2. Guru memberikan apersepsi mengaitkan materi sebelumnya dengan topik <b>${selectedTp.title}</b>.<br/>
+              3. Guru menyampaikan tujuan pembelajaran dan manfaat materi dalam kehidupan sehari-hari.
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:bold;">2. Kegiatan Inti (60 Menit)</td>
+            <td>
+              1. <b>Orientasi Masalah:</b> Guru menampilkan permasalahan kontekstual terkait ${selectedTp.materi}.<br/>
+              2. <b>Eksplorasi & Diskusi:</b> ${selectedTp.aktivitas}<br/>
+              3. <b>Presentasi & Konfirmasi:</b> Setiap kelompok mempresentasikan hasil LKPD dan ditanggapi kelompok lain.
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:bold;">3. Kegiatan Penutup (10 Menit)</td>
+            <td>
+              1. Peserta didik bersama guru menyimpulkan poin penting materi <b>${selectedTp.title}</b>.<br/>
+              2. Guru memberikan kuis formatif singkat dan refleksi pembelajaran hari ini.
+            </td>
+          </tr>
+          <tr style="background-color:#f0f0f0; font-weight:bold;"><td colspan="2">C. ASESMEN PEMBELAJARAN</td></tr>
+          <tr>
+            <td style="font-weight:bold;">Teknik Asesmen</td>
+            <td>1. Asesmen Formatif: Observasi keaktifan diskusi & penilaian LKPD.<br/>2. Asesmen Sumatif: Tes tertulis (Pilihan Ganda & Uraian).</td>
+          </tr>
+        </table>
+      `;
+    } else if (docType === 'lkpd') {
+      bodyContent = `
+        <h3 style="text-align:center; font-size:12pt; margin: 0 0 12px 0;">LEMBAR KERJA PESERTA DIDIK (LKPD)</h3>
+        ${identityTableHtml}
+        <div style="border:1px solid #000; padding:10px; margin-bottom:12px; font-size:10pt;">
+          <b>Nama Kelompok / Siswa :</b> ....................................................................<br/>
+          <b>Kelas / Rombel :</b> ${classData.activeClass}<br/>
+          <b>Topik Bahasan :</b> TP ${selectedTp.code} - ${selectedTp.title}
+        </div>
+        <p style="font-size:10pt;"><b>A. Tujuan Aktivitas:</b><br/>${selectedTp.indikator}</p>
+        <p style="font-size:10pt;"><b>B. Instruksi Kerja Kelompok:</b><br/>${selectedTp.aktivitas}</p>
+        <p style="font-size:10pt;"><b>C. Pertanyaan Diskusi & Latihan:</b></p>
+        <ol style="font-size:10pt; line-height:1.6;">
+          ${selectedTp.questions.map(q => `<li>${q.q}<br/>a. ${q.options[0]} &nbsp;&nbsp; b. ${q.options[1]} &nbsp;&nbsp; c. ${q.options[2]} &nbsp;&nbsp; d. ${q.options[3]}</li>`).join('')}
+          <li><b>Soal Eksplorasi Kelompok:</b> ${selectedTp.essay}<br/><br/><i>Jawaban Kelompok:</i><br/>......................................................................................................................................................<br/>......................................................................................................................................................</li>
+        </ol>
+      `;
+    } else if (docType === 'asesmen') {
+      bodyContent = `
+        <h3 style="text-align:center; font-size:12pt; margin: 0 0 12px 0;">DOKUMEN ${examType.toUpperCase()} (KISI-KISI, SOAL & KUNCI JAWABAN)</h3>
+        ${identityTableHtml}
+        <h4 style="font-size:10pt; margin:10px 0 6px 0;">1. KISI-KISI PENULISAN SOAL</h4>
+        <table style="width:100%; border-collapse:collapse; font-size:9.5pt;" border="1" cellpadding="5">
+          <thead>
+            <tr style="background-color:#f0f0f0; font-weight:bold; text-align:center;">
+              <th>No</th>
+              <th>Kode TP</th>
+              <th>Materi Pokok</th>
+              <th>Indikator Soal</th>
+              <th>Level</th>
+              <th>Bentuk Soal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tps.map((tp, idx) => `
+              <tr>
+                <td style="text-align:center;">${idx + 1}</td>
+                <td style="text-align:center; font-weight:bold;">${tp.code}</td>
+                <td>${tp.materi}</td>
+                <td>${tp.indikator}</td>
+                <td style="text-align:center;">L2 / C3</td>
+                <td style="text-align:center;">PG & Uraian</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <h4 style="font-size:10pt; margin:16px 0 6px 0;">2. NASKAH SOAL & KUNCI JAWABAN</h4>
+        <ol style="font-size:10pt; line-height:1.5;">
+          ${tps.flatMap(tp => tp.questions.map(q => `
+            <li style="margin-bottom:8px;">
+              [TP ${tp.code}] ${q.q}<br/>
+              A. ${q.options[0]} &nbsp;&nbsp; B. ${q.options[1]} &nbsp;&nbsp; C. ${q.options[2]} &nbsp;&nbsp; D. ${q.options[3]}<br/>
+              <b>Kunci Jawaban: ${q.ans}</b> (Level Kognitif: ${q.level})
+            </li>
+          `)).join('')}
+        </ol>
+      `;
+    } else if (docType === 'nilai' || docType === 'rapor') {
+      bodyContent = `
+        <h3 style="text-align:center; font-size:12pt; margin: 0 0 12px 0;">DAFTAR NILAI & REKAP CAPAIAN RAPOR PESERTA DIDIK</h3>
+        ${identityTableHtml}
+        <table style="width:100%; border-collapse:collapse; font-size:9.5pt;" border="1" cellpadding="5">
+          <thead>
+            <tr style="background-color:#f0f0f0; font-weight:bold; text-align:center;">
+              <th style="width:5%;">No</th>
+              <th style="width:20%;">Nama Peserta Didik</th>
+              <th style="width:7%;">TP 1</th>
+              <th style="width:7%;">TP 2</th>
+              <th style="width:7%;">TP 3</th>
+              <th style="width:7%;">TP 4</th>
+              <th style="width:7%;">STS</th>
+              <th style="width:7%;">SAS</th>
+              <th style="width:8%;">Nilai Rapor</th>
+              <th style="width:25%;">Deskripsi Capaian Kompetensi Rapor</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${studentsWithSummary.map((s, idx) => `
+              <tr>
+                <td style="text-align:center;">${idx + 1}</td>
+                <td style="font-weight:bold;">${s.name}</td>
+                <td style="text-align:center;">${s.tp1}</td>
+                <td style="text-align:center;">${s.tp2}</td>
+                <td style="text-align:center;">${s.tp3}</td>
+                <td style="text-align:center;">${s.tp4}</td>
+                <td style="text-align:center;">${s.sts}</td>
+                <td style="text-align:center;">${s.sas}</td>
+                <td style="text-align:center; font-weight:bold;">${s.finalScore}</td>
+                <td style="font-size:8.5pt;">${s.desc}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else {
+      // Paket Lengkap / Default
+      bodyContent = `
+        <h3 style="text-align:center; font-size:12pt; margin: 0 0 12px 0;">PAKET LENGKAP ADMINISTRASI GURU SATU SEMESTER</h3>
+        ${identityTableHtml}
+        <p style="font-size:10pt;"><b>1. Capaian Pembelajaran (CP):</b><br/>${cpText}</p>
+        <p style="font-size:10pt;"><b>2. Ringkasan Alur Tujuan Pembelajaran (ATP) & Prota:</b></p>
+        <table style="width:100%; border-collapse:collapse; font-size:9.5pt; margin-bottom:14px;" border="1" cellpadding="5">
+          <tr style="background-color:#f0f0f0; font-weight:bold;">
+            <th>Kode TP</th><th>Tujuan Pembelajaran</th><th>Materi Pokok</th><th>Alokasi JP</th><th>Minggu Efektif</th>
+          </tr>
+          ${tps.map(tp => `
+            <tr>
+              <td style="text-align:center;">${tp.code}</td>
+              <td>${tp.title}</td>
+              <td>${tp.materi}</td>
+              <td style="text-align:center;">${tp.jp} JP</td>
+              <td style="text-align:center;">Minggu ke-${tp.weeks.join(', ')}</td>
+            </tr>
+          `).join('')}
+        </table>
+      `;
+    }
+
+    const fullHtml = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset="utf-8">
+        <title>${customTitle}</title>
+        <style>
+          @page { size: A4; margin: 2cm; }
+          body { font-family: Arial, sans-serif; font-size: 10pt; color: #000000; line-height: 1.4; }
+          table { border-collapse: collapse; width: 100%; }
+        </style>
+      </head>
+      <body>
+        ${kopHtml}
+        ${bodyContent}
+        ${signatureHtml}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${customTitle.replace(/\s+/g, '_')}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    setDownloadedDocs(prev => ({ ...prev, [docType]: true }));
+    showToast(`File Word "${customTitle}.doc" berhasil diunduh!`);
+  };
+
+  // Export CSV untuk e-Rapor
+  const exportERaporCsv = () => {
+    const headers = ['No', 'NIS', 'Nama Siswa', 'Kelas', 'Mata Pelajaran', 'TP 1', 'TP 2', 'TP 3', 'TP 4', 'STS', 'SAS', 'Nilai Akhir Rapor', 'Deskripsi Capaian Kompetensi'];
+    const rows = studentsWithSummary.map((s, idx) => [
+      idx + 1,
+      s.nis,
+      `"${s.name}"`,
+      classData.activeClass,
+      classData.subject,
+      s.tp1,
+      s.tp2,
+      s.tp3,
+      s.tp4,
+      s.sts,
+      s.sas,
+      s.finalScore,
+      `"${s.desc}"`
+    ]);
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Rekap_Nilai_eRapor_${classData.subject}_${classData.activeClass}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('File Rekap Nilai CSV untuk e-Rapor berhasil diunduh!');
+  };
+
+  // 18 Kartu Modul Beranda (Persis Video 0:00 - 0:07)
+  const videoGridCards = [
+    { id: 'c1', title: 'Data Kelas Saya', target: 'datakelas', highlight: false },
+    { id: 'c2', title: 'CP dan TP', target: 'cptp', highlight: false },
+    { id: 'c3', title: 'ATP', target: 'persiapan', highlight: false },
+    { id: 'c4', title: 'Prota', target: 'persiapan', highlight: false },
+    { id: 'c5', title: 'Promes', target: 'persiapan', highlight: true },
+    { id: 'c6', title: 'Silabus', target: 'persiapan', highlight: true },
+    { id: 'c7', title: 'Modul Ajar / RPP', target: 'perangkat', sub: 'modul', highlight: true },
+    { id: 'c8', title: 'LKPD', target: 'perangkat', sub: 'lkpd', highlight: false },
+    { id: 'c9', title: 'Soal Harian dan Kuis', target: 'perangkat', sub: 'kuis', highlight: true },
+    { id: 'c10', title: 'Asesmen Sumatif', target: 'asesmen', sub: 'Asesmen Sumatif', highlight: true },
+    { id: 'c11', title: 'Soal STS dan SAS', target: 'asesmen', sub: 'Soal STS dan SAS', highlight: true },
+    { id: 'c12', title: 'Daftar Nilai', target: 'harian', sub: 'nilai', highlight: true },
+    { id: 'c13', title: 'Presensi', target: 'harian', sub: 'presensi', highlight: false },
+    { id: 'c14', title: 'Jurnal mengajar', target: 'harian', sub: 'jurnal', highlight: true },
+    { id: 'c15', title: 'Deskripsi Rapor', target: 'rapor', highlight: true },
+    { id: 'c16', title: 'Rekap Nilai Rapor', target: 'rapor', highlight: true },
+    { id: 'c17', title: 'Paket Siap Supervisi', target: 'supervisi', highlight: true },
+    { id: 'c18', title: 'Template Administrasi Kelas', target: 'template', highlight: false },
+  ];
+
+  const handleCardClick = (card) => {
+    setActiveMenu(card.target);
+    if (card.target === 'perangkat' && card.sub) setPerangkatType(card.sub);
+    if (card.target === 'asesmen' && card.sub) setExamType(card.sub);
+    if (card.target === 'harian' && card.sub) setDailyTab(card.sub);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#FFF9F5] via-[#FFF3E6] to-[#FDE68A]/35 text-slate-800 flex flex-col md:flex-row font-sans">
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-5 right-5 z-50 bg-gradient-to-r from-red-950 via-red-800 to-amber-700 text-amber-50 px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-amber-300/60">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-300 to-amber-500 flex items-center justify-center text-red-950 shrink-0 shadow-xs">
+            <CheckCircle2 className="w-4 h-4" />
+          </div>
+          <span className="text-xs sm:text-sm font-bold tracking-wide">{toastMsg}</span>
+        </div>
+      )}
+
+      {/* Modal Tambah Rombel Paralel (Mendukung Kelas VII A-F, VIII A-F, IX A-F) */}
+      {showRombelModal && (
+        <div className="fixed inset-0 z-50 bg-red-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-7 shadow-2xl border-2 border-red-300/80 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-red-100 to-amber-100 text-red-900 text-[11px] font-extrabold mb-1 border border-red-200">
+                  <Sparkles className="w-3 h-3 text-red-600" /> Multi-Rombel Otomatis
+                </span>
+                <h3 className="text-lg font-extrabold text-slate-900">Tambah Rombel Paralel (Kelas VII, VIII & IX)</h3>
+                <p className="text-xs text-slate-500">
+                  Pilih kelas paralel yang Anda ajar (VII A–F, VIII A–F, IX A–F). Data CP, TP, Modul Ajar & Soal otomatis menyesuaikan jenjang.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowRombelModal(false)}
+                className="px-3.5 py-1.5 rounded-xl bg-red-50 text-red-900 hover:bg-red-100 border border-red-200 text-xs font-extrabold transition"
+              >
+                Tutup ✕
+              </button>
+            </div>
+
+            {/* Filter Tab Jenjang Kelas */}
+            <div className="flex flex-wrap items-center gap-2 my-4 pb-3 border-b border-red-100">
+              {[
+                { id: 'ALL', label: 'Semua Jenjang (VII, VIII, IX)' },
+                { id: 'VII', label: 'Kelas VII (A–F)' },
+                { id: 'VIII', label: 'Kelas VIII (A–F)' },
+                { id: 'IX', label: 'Kelas IX (A–F)' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveRombelTab(tab.id)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition ${
+                    activeRombelTab === tab.id
+                      ? 'bg-gradient-to-r from-red-700 via-red-600 to-amber-500 text-white shadow-sm'
+                      : 'bg-red-50/70 text-red-900 hover:bg-amber-100/70 border border-red-200/60'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Daftar Rombel per Jenjang (VII A-F, VIII A-F, IX A-F) */}
+            <div className="space-y-5 mb-6">
+              {(['VII', 'VIII', 'IX'])
+                .filter(grade => activeRombelTab === 'ALL' || activeRombelTab === grade)
+                .map(grade => {
+                  const groupList = ROMBEL_GROUPS[grade];
+                  const selectedInGroup = groupList.filter(r => classData.parallelClasses.includes(r)).length;
+                  const allSelected = selectedInGroup === groupList.length;
+
+                  return (
+                    <div key={grade} className="p-4 rounded-2xl bg-gradient-to-br from-red-50/60 via-amber-50/40 to-white border border-red-200/80 shadow-2xs">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-red-700 to-amber-500 text-white font-extrabold text-xs shadow-2xs">
+                            KELAS {grade}
+                          </span>
+                          <span className="text-xs font-bold text-slate-800">
+                            Rombel Paralel {grade} A s.d. {grade} F
+                          </span>
+                          <span className="text-[11px] font-bold text-red-900 bg-amber-200/70 px-2.5 py-0.5 rounded-full">
+                            {selectedInGroup}/6 terpilih
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => toggleGradeGroupRombels(grade)}
+                          className="text-xs font-extrabold text-red-700 hover:text-red-900 hover:underline self-start sm:self-center"
+                        >
+                          {allSelected ? `Reset Kelas ${grade}` : `+ Pilih Semua Kelas ${grade} (A–F)`}
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                        {groupList.map(rombel => {
+                          const isSelected = classData.parallelClasses.includes(rombel);
+                          const isCurrentActive = classData.activeClass === rombel;
+                          return (
+                            <button
+                              key={rombel}
+                              onClick={() => toggleParallelRombel(rombel)}
+                              className={`py-2.5 px-3 rounded-xl font-extrabold text-sm border-2 transition-all flex flex-col items-center justify-center ${
+                                isSelected
+                                  ? 'bg-gradient-to-br from-red-700 via-red-600 to-amber-500 text-white border-amber-400 shadow-sm scale-[1.02]'
+                                  : 'bg-white text-slate-700 border-red-200/80 hover:border-red-400 hover:bg-red-50/40'
+                              }`}
+                            >
+                              <span>{rombel}</span>
+                              {isCurrentActive && (
+                                <span className="text-[9px] bg-amber-100 text-red-900 px-1.5 rounded-full font-extrabold mt-0.5 shadow-2xs">
+                                  Aktif
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* Tambah Rombel Kustom (Misal: VII G, VIII H, IX Unggulan) */}
+            <div className="p-3.5 rounded-2xl bg-red-50/60 border border-red-200 mb-5 flex flex-col sm:flex-row items-center gap-2">
+              <input
+                type="text"
+                placeholder="Punya rombel lain? Ketik misal: VII G, VIII H, atau IX G..."
+                value={customRombelInput}
+                onChange={(e) => setCustomRombelInput(e.target.value)}
+                className="flex-1 w-full px-3.5 py-2.5 rounded-xl border border-red-300 text-xs font-semibold bg-white focus:outline-none focus:border-red-600"
+              />
+              <button
+                onClick={handleAddCustomRombel}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-900 to-amber-900 text-amber-100 font-bold text-xs shrink-0 hover:from-red-800 hover:to-amber-800 transition"
+              >
+                + Tambah Rombel Kustom
+              </button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-red-100">
+              <div className="text-xs text-slate-600">
+                Total dipilih: <b className="text-red-700">{classData.parallelClasses.length} Rombel</b> ({classData.parallelClasses.join(', ')})
+              </div>
+              <button
+                onClick={() => {
+                  setShowRombelModal(false);
+                  showToast(`${classData.parallelClasses.length} Rombel paralel aktif & siap digunakan!`);
+                }}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 hover:from-red-800 hover:to-amber-600 text-white font-extrabold text-sm shadow-md shadow-red-600/20 transition"
+              >
+                Simpan ({classData.parallelClasses.length} Rombel Aktif)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SIDEBAR NAVIGASI (MODERN CRIMSON-GOLD LUXURY) */}
+      <aside className="w-full md:w-76 bg-white/95 backdrop-blur-md border-b md:border-b-0 md:border-r border-red-200/80 flex flex-col justify-between shrink-0 shadow-sm">
+        <div>
+          {/* Brand Header */}
+          <div className="p-5 border-b border-red-100 bg-gradient-to-r from-red-900 via-red-700 to-amber-600 text-white flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 flex items-center justify-center text-red-950 font-extrabold text-lg shadow-md border border-white/60">
+                AG
+              </div>
+              <div>
+                <h1 className="font-extrabold text-white text-base leading-tight tracking-tight">Administrasi Guru</h1>
+                <p className="text-xs font-semibold text-amber-200">Sekali isi, 1 semester beres</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Active Class & Rombel Quick Switcher */}
+          <div className="p-4 mx-3.5 mt-4 rounded-2xl bg-gradient-to-br from-red-50 via-amber-50/80 to-yellow-100/60 border border-red-300/70 shadow-2xs">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-extrabold text-red-900 uppercase tracking-wider">{classData.subject}</span>
+              <span className="text-[11px] font-extrabold bg-gradient-to-r from-red-700 to-amber-500 text-white px-2.5 py-0.5 rounded-full shadow-2xs">
+                {classData.academicYear}
+              </span>
+            </div>
+            <div className="text-xs text-slate-700 truncate mb-2.5 font-bold">{classData.schoolName}</div>
+            <div className="flex flex-wrap gap-1.5 mb-3 max-h-28 overflow-y-auto pr-1">
+              {classData.parallelClasses.map(r => (
+                <button
+                  key={r}
+                  onClick={() => handleActiveRombelChange(r)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-extrabold transition-all ${
+                    classData.activeClass === r
+                      ? 'bg-gradient-to-r from-red-700 via-red-600 to-amber-500 text-white shadow-xs scale-105'
+                      : 'bg-white/90 text-red-950 border border-red-200 hover:bg-red-100/70'
+                  }`}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowRombelModal(true)}
+              className="w-full py-2 px-3 text-xs font-extrabold text-red-900 bg-white hover:bg-red-50 border border-red-300 rounded-xl transition flex items-center justify-center gap-1.5 shadow-2xs"
+            >
+              <Plus className="w-3.5 h-3.5 text-red-600" /> Tambah rombel (VII / VIII / IX)
+            </button>
+          </div>
+
+          {/* Navigation Menu */}
+          <nav className="p-3.5 space-y-1">
+            {[
+              { id: 'dashboard', label: 'Beranda (18 Modul)', icon: Layers },
+              { id: 'datakelas', label: '1. Data Kelas Saya', icon: Building2 },
+              { id: 'cptp', label: '2. CP dan TP Otomatis', icon: BookOpen },
+              { id: 'persiapan', label: '3. ATP, Prota, Promes & Silabus', icon: Calendar },
+              { id: 'perangkat', label: '4. Modul Ajar, LKPD & Kuis', icon: FileText },
+              { id: 'harian', label: '5. Kelas Harian (HP Mode)', icon: Smartphone },
+              { id: 'asesmen', label: '6. Asesmen Sumatif & STS/SAS', icon: ClipboardList },
+              { id: 'rapor', label: '7. Deskripsi & Rekap Rapor', icon: Award },
+              { id: 'template', label: '8. Format & Kop Sekolah', icon: Settings },
+              { id: 'supervisi', label: '9. Paket Siap Supervisi (.doc)', icon: FolderCheck },
+            ].map(item => {
+              const Icon = item.icon;
+              const active = activeMenu === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveMenu(item.id)}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left text-sm transition-all ${
+                    active
+                      ? 'bg-gradient-to-r from-red-700 via-red-600 to-amber-500 text-white font-extrabold shadow-md shadow-red-600/25'
+                      : 'text-slate-700 font-semibold hover:bg-red-50/90 hover:text-red-900'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-amber-200' : 'text-red-600'}`} />
+                  <span className="truncate">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Footer Credit */}
+        <div className="p-4 border-t border-red-100 text-center bg-gradient-to-r from-red-50/60 to-amber-50/60">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-red-100 via-amber-100 to-yellow-100 border border-red-200/80 text-red-950 text-xs font-bold">
+            <span>Administrasi Guru v3.5</span>
+            <span>•</span>
+            <span className="text-red-700 font-extrabold">Crimson Gold</span>
+          </div>
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+        <div className="max-w-5xl mx-auto space-y-6">
+
+          {/* MODERN INTERACTIVE TOP BAR (GANTI KELAS & MAPEL LANGSUNG TANPA PINDAH HALAMAN) */}
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl p-3.5 px-5 border-2 border-red-200/80 shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Quick Rombel Selector */}
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-700 via-red-600 to-amber-500 text-white px-3 py-1.5 rounded-xl shadow-xs">
+                <GraduationCap className="w-4 h-4 text-amber-200" />
+                <span className="text-xs font-bold opacity-90">Kelas:</span>
+                <select
+                  value={classData.activeClass}
+                  onChange={(e) => handleActiveRombelChange(e.target.value)}
+                  className="bg-transparent text-white font-extrabold text-xs focus:outline-none cursor-pointer"
+                >
+                  {classData.parallelClasses.map(r => (
+                    <option key={r} value={r} className="text-slate-900 font-bold">{r}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Quick Subject Selector */}
+              <div className="flex items-center gap-1.5 bg-amber-50 border border-red-200 px-3 py-1.5 rounded-xl">
+                <BookOpen className="w-3.5 h-3.5 text-red-600" />
+                <span className="text-xs font-bold text-slate-600">Mapel:</span>
+                <select
+                  value={classData.subject}
+                  onChange={(e) => handleSubjectChange(e.target.value)}
+                  className="bg-transparent text-red-950 font-extrabold text-xs focus:outline-none cursor-pointer"
+                >
+                  {Object.keys(SUBJECT_PRESETS).map(subj => (
+                    <option key={subj} value={subj}>{subj}</option>
+                  ))}
+                </select>
+              </div>
+
+              <span className="hidden lg:inline-block text-xs font-bold text-slate-500">
+                • {classData.schoolName} ({classData.academicYear})
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {activeMenu !== 'dashboard' && (
+                <button
+                  onClick={() => setActiveMenu('dashboard')}
+                  className="px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-900 border border-red-200 text-xs font-extrabold transition"
+                >
+                  ← Beranda
+                </button>
+              )}
+              <button
+                onClick={() => setActiveMenu('supervisi')}
+                className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 hover:from-red-800 hover:to-amber-600 text-white text-xs font-extrabold shadow-sm flex items-center gap-1.5 transition"
+              >
+                <Download className="w-3.5 h-3.5" /> Unduh Word
+              </button>
+            </div>
+          </div>
+
+          {/* ==========================================
+              VIEW 0: DASHBOARD UTAMA (PERSIS VIDEO 0:00 - 0:07)
+          ========================================== */}
+          {activeMenu === 'dashboard' && (
+            <div className="space-y-7">
+              {/* Hero Banner Merah Keemasan Gradasi */}
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-900 via-red-700 to-amber-500 p-6 md:p-9 text-white shadow-xl shadow-red-700/20 border-2 border-amber-300/60">
+                <div className="relative z-10 max-w-2xl space-y-3.5">
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-400/25 backdrop-blur-xs text-amber-100 text-xs font-extrabold border border-amber-300/50">
+                    <Sparkles className="w-3.5 h-3.5 text-yellow-300" /> Terintegrasi Kurikulum Merdeka • {classData.schoolName}
+                  </span>
+                  <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight leading-tight drop-shadow-xs">
+                    Satu aplikasi, administrasi guru satu semester.
+                  </h2>
+                  <p className="text-amber-50 text-sm md:text-base font-medium leading-relaxed">
+                    Sekali isi data kelas (<span className="font-extrabold text-yellow-200 underline decoration-amber-300">{classData.activeClass} - {classData.subject}</span>), seluruh dokumen dari awal sampai akhir semester langsung siap diedit & diunduh ke MS Word.
+                  </p>
+                  <div className="pt-2 flex flex-wrap gap-2.5">
+                    <button
+                      onClick={() => setActiveMenu('datakelas')}
+                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 text-red-950 hover:from-amber-200 hover:to-yellow-300 font-extrabold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5"
+                    >
+                      <Building2 className="w-4 h-4 text-red-800" /> 1. Atur Data Kelas & Mapel
+                    </button>
+                    <button
+                      onClick={() => setShowRombelModal(true)}
+                      className="px-4 py-2.5 rounded-xl bg-red-950/40 hover:bg-red-950/60 text-amber-100 border border-amber-300/40 font-extrabold text-xs sm:text-sm transition flex items-center gap-1.5"
+                    >
+                      <Plus className="w-4 h-4 text-amber-300" /> Pilih Rombel VII / VIII / IX
+                    </button>
+                  </div>
+                </div>
+                {/* Ornamen Dekoratif Merah Keemasan */}
+                <div className="pointer-events-none absolute -right-12 -bottom-16 w-72 h-72 rounded-full bg-amber-400/30 blur-2xl" />
+                <div className="pointer-events-none absolute right-8 top-6 hidden lg:flex w-24 h-24 rounded-3xl bg-gradient-to-br from-amber-300/25 to-red-900/25 backdrop-blur-xs border border-amber-200/40 items-center justify-center rotate-6 shadow-lg">
+                  <Award className="w-12 h-12 text-amber-200" />
+                </div>
+              </div>
+
+              {/* 4 Langkah Cepat Penggunaan (Agar Mudah Digunakan Guru) */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {[
+                  { step: 'Langkah 1', title: 'Pilih Kelas & Mapel', desc: 'Otomatis muat CP & TP', action: () => setActiveMenu('datakelas') },
+                  { step: 'Langkah 2', title: 'Cek Promes & ATP', desc: '16 Minggu efektif siap', action: () => setActiveMenu('persiapan') },
+                  { step: 'Langkah 3', title: 'Input Nilai & Presensi', desc: 'Deskripsi rapor otomatis', action: () => setActiveMenu('harian') },
+                  { step: 'Langkah 4', title: 'Unduh Paket Word', desc: 'Lengkap Kop Sekolah', action: () => setActiveMenu('supervisi') },
+                ].map((s, i) => (
+                  <button
+                    key={i}
+                    onClick={s.action}
+                    className="text-left p-3.5 rounded-2xl bg-gradient-to-br from-white via-red-50/30 to-amber-50/50 border border-red-200/80 hover:border-red-500 shadow-2xs transition group"
+                  >
+                    <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-gradient-to-r from-red-700 to-amber-500 text-white mb-1">
+                      {s.step}
+                    </span>
+                    <div className="font-extrabold text-slate-900 text-xs sm:text-sm group-hover:text-red-700 transition">{s.title}</div>
+                    <div className="text-[11px] text-slate-500">{s.desc}</div>
+                  </button>
+                ))}
+              </div>
+
+              {/* 18-Card Grid Persis Seperti Video dengan Sentuhan Merah Keemasan */}
+              <div>
+                <div className="flex items-center justify-between mb-3.5 px-1">
+                  <h3 className="font-extrabold text-slate-900 text-base md:text-lg flex items-center gap-2">
+                    <span className="w-2.5 h-6 rounded-full bg-gradient-to-b from-red-700 via-red-500 to-amber-400 inline-block" />
+                    18 Modul Administrasi Guru Terintegrasi
+                  </h3>
+                  <span className="text-xs font-bold text-red-900 bg-gradient-to-r from-red-100 to-amber-100 border border-red-200 px-3 py-1 rounded-full">
+                    Klik kartu untuk membuka
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 md:gap-4">
+                  {videoGridCards.map((card, index) => (
+                    <button
+                      key={card.id}
+                      onClick={() => handleCardClick(card)}
+                      className={`group text-left bg-white p-4 rounded-2xl transition-all flex items-center gap-3.5 hover:shadow-lg hover:shadow-red-600/10 hover:-translate-y-0.5 ${
+                        card.highlight
+                          ? 'border-2 border-red-400/90 shadow-xs'
+                          : 'border border-amber-200/90 shadow-2xs hover:border-red-400'
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-100 via-amber-100 to-yellow-100 text-red-800 flex items-center justify-center shrink-0 group-hover:from-red-700 group-hover:via-red-600 group-hover:to-amber-500 group-hover:text-white transition-all shadow-2xs">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[10px] font-extrabold text-red-700 uppercase tracking-wider">
+                          Modul {index + 1}
+                        </div>
+                        <div className="font-extrabold text-slate-900 text-sm md:text-base leading-snug truncate">
+                          {card.title}
+                        </div>
+                        <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-1 mt-0.5">
+                          <Check className="w-3 h-3" /> Siap digunakan
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Alur Cepat Banner */}
+              <div className="bg-gradient-to-r from-red-50 via-amber-50 to-yellow-100/80 rounded-3xl p-6 border-2 border-red-300/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-white bg-gradient-to-r from-red-700 to-amber-600 px-2.5 py-0.5 rounded-full">
+                    Ekspor Instan MS Word
+                  </span>
+                  <h3 className="font-extrabold text-lg text-slate-900 mt-1.5">Butuh semua file Word sekarang untuk Supervisi?</h3>
+                  <p className="text-sm text-slate-700">
+                    Unduh ATP, Prota, Promes, Silabus, Modul Ajar, Daftar Nilai, dan Rekap e-Rapor sekaligus dengan format Kop Sekolah.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => setActiveMenu('datakelas')}
+                    className="px-4 py-2.5 rounded-xl bg-white border border-red-300 text-red-950 font-bold text-sm hover:bg-red-50 transition"
+                  >
+                    Ubah Data Kelas
+                  </button>
+                  <button
+                    onClick={() => setActiveMenu('supervisi')}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 hover:from-red-800 hover:to-amber-600 text-white font-extrabold text-sm shadow-md shadow-red-600/20 flex items-center gap-2 transition"
+                  >
+                    <Download className="w-4 h-4" /> Buka Paket Supervisi
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==========================================
+              VIEW 1: DATA KELAS SAYA (VIDEO 0:08 - 0:11 & 0:58)
+          ========================================== */}
+          {activeMenu === 'datakelas' && (
+            <div className="max-w-2xl mx-auto space-y-6">
+              <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-red-200/80 shadow-md">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-red-700 via-red-600 to-amber-500 text-white flex items-center justify-center shadow-sm">
+                      <Building2 className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-extrabold text-slate-900">Data Kelas Saya</h2>
+                      <p className="text-xs text-slate-500">Isi sekali saja, seluruh dokumen langsung tersinkronisasi</p>
+                    </div>
+                  </div>
+                  <span className="bg-gradient-to-r from-red-700 to-amber-500 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl shadow-2xs">
+                    Cukup sekali
+                  </span>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-extrabold text-slate-700 mb-1">Satuan pendidikan</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={classData.schoolName}
+                        onChange={(e) => setClassData({ ...classData, schoolName: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl border border-red-300 font-bold text-slate-900 focus:outline-none focus:border-red-600 bg-red-50/20"
+                      />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 absolute right-3.5 top-3.5" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-extrabold text-slate-700 mb-1">Kelas / Rombel Aktif (VII A–F, VIII A–F, IX A–F)</label>
+                      <div className="flex gap-2">
+                        <select
+                          value={classData.activeClass}
+                          onChange={(e) => handleActiveRombelChange(e.target.value)}
+                          className="w-full px-3.5 py-3 rounded-xl border-2 border-red-500 bg-amber-50/40 font-extrabold text-slate-900 focus:outline-none"
+                        >
+                          <optgroup label="Kelas VII (A - F)">
+                            {ROMBEL_GROUPS.VII.map(r => <option key={r} value={r}>{r}</option>)}
+                          </optgroup>
+                          <optgroup label="Kelas VIII (A - F)">
+                            {ROMBEL_GROUPS.VIII.map(r => <option key={r} value={r}>{r}</option>)}
+                          </optgroup>
+                          <optgroup label="Kelas IX (A - F)">
+                            {ROMBEL_GROUPS.IX.map(r => <option key={r} value={r}>{r}</option>)}
+                          </optgroup>
+                          {classData.parallelClasses
+                            .filter(r => ![...ROMBEL_GROUPS.VII, ...ROMBEL_GROUPS.VIII, ...ROMBEL_GROUPS.IX].includes(r))
+                            .map(r => (
+                              <option key={r} value={r}>{r} (Kustom)</option>
+                            ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-extrabold text-slate-700 mb-1">Mata pelajaran (Otomatis Isi CP & TP)</label>
+                      <select
+                        value={classData.subject}
+                        onChange={(e) => handleSubjectChange(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-red-500 bg-amber-50/40 font-extrabold text-slate-900 focus:outline-none"
+                      >
+                        <option value="Matematika">Matematika (Fase D - SMP)</option>
+                        <option value="Informatika">Informatika (Fase D - SMP)</option>
+                        <option value="Bahasa Indonesia">Bahasa Indonesia (Fase D - SMP)</option>
+                        <option value="IPA">Ilmu Pengetahuan Alam / IPA (Fase D)</option>
+                        <option value="IPS">Ilmu Pengetahuan Sosial / IPS (Fase D)</option>
+                        <option value="Bahasa Inggris">Bahasa Inggris (Fase D - SMP)</option>
+                        <option value="PPKn">Pendidikan Pancasila / PPKn (Fase D)</option>
+                        <option value="Seni Budaya">Seni Budaya (Fase D - SMP)</option>
+                        <option value="B. Indramayu">Bahasa Indramayu / Mulok (Fase D - SMP)</option>
+                        <option value="PJOK">PJOK / Penjasorkes (Fase D - SMP)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-extrabold text-slate-700 mb-1">Tahun ajaran</label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={classData.academicYear}
+                          onChange={(e) => setClassData({ ...classData, academicYear: e.target.value })}
+                          className="w-full px-4 py-3 rounded-xl border border-red-300 font-semibold text-slate-900"
+                        />
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 absolute right-3.5 top-3.5" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-extrabold text-slate-700 mb-1">Semester</label>
+                      <select
+                        value={classData.semester}
+                        onChange={(e) => setClassData({ ...classData, semester: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl border border-red-300 font-semibold text-slate-900"
+                      >
+                        <option value="Ganjil">Ganjil (Juli – Desember)</option>
+                        <option value="Genap">Genap (Januari – Juni)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-red-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">Nama Guru Mata Pelajaran</label>
+                      <input
+                        type="text"
+                        value={classData.teacherName}
+                        onChange={(e) => setClassData({ ...classData, teacherName: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-red-200 text-sm font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">NIP Guru</label>
+                      <input
+                        type="text"
+                        value={classData.teacherNip}
+                        onChange={(e) => setClassData({ ...classData, teacherNip: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-red-200 text-sm font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">Nama Kepala Sekolah</label>
+                      <input
+                        type="text"
+                        value={classData.principalName}
+                        onChange={(e) => setClassData({ ...classData, principalName: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-red-200 text-sm font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">NIP Kepala Sekolah</label>
+                      <input
+                        type="text"
+                        value={classData.principalNip}
+                        onChange={(e) => setClassData({ ...classData, principalNip: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-red-200 text-sm font-medium"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Multi Rombel Paralel Card */}
+                <div className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-red-50 via-amber-50/70 to-yellow-100/50 border border-red-300/80 space-y-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="font-extrabold text-slate-900 text-sm">
+                        Rombel Aktif: <span className="text-red-700">{classData.activeClass}</span> • {classData.subject}
+                      </div>
+                      <div className="text-xs text-slate-600">
+                        Mengajar lintas kelas atau paralel? Pilih cepat rombel Kelas VII A–F, VIII A–F, dan IX A–F:
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowRombelModal(true)}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 text-white font-extrabold text-xs hover:from-red-800 hover:to-amber-600 shrink-0 shadow-xs"
+                    >
+                      + Kelola Rombel VII / VIII / IX ({classData.parallelClasses.length} Kelas)
+                    </button>
+                  </div>
+
+                  {/* Quick Pills Rombel Terpilih */}
+                  <div className="flex flex-wrap gap-1.5 pt-2 border-t border-red-200/80">
+                    {classData.parallelClasses.map(r => (
+                      <button
+                        key={r}
+                        onClick={() => handleActiveRombelChange(r)}
+                        className={`px-3 py-1 rounded-lg text-xs font-extrabold transition ${
+                          classData.activeClass === r
+                            ? 'bg-gradient-to-r from-red-700 to-amber-500 text-white shadow-2xs'
+                            : 'bg-white text-red-950 border border-red-300 hover:border-red-500'
+                        }`}
+                      >
+                        {r} {classData.activeClass === r && '✓'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => {
+                      showToast('Data kelas tersimpan! Membuka CP dan TP...');
+                      setActiveMenu('cptp');
+                    }}
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 hover:from-red-800 hover:to-amber-600 text-white font-extrabold text-sm shadow-md shadow-red-600/20 flex items-center gap-2 transition"
+                  >
+                    Lanjut ke CP dan TP <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==========================================
+              VIEW 2: CP DAN TP (VIDEO 0:12 - 0:15)
+          ========================================== */}
+          {activeMenu === 'cptp' && (
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-red-200/80 shadow-md">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-900">CP dan TP</h2>
+                    <p className="text-sm font-bold text-red-700">
+                      {classData.subject} • {classData.fase} • {classData.activeClass}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleAddTp}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-100 to-amber-100 text-red-900 hover:from-red-200 hover:to-amber-200 border border-red-300 font-extrabold text-xs flex items-center gap-1.5 self-start transition"
+                  >
+                    <Plus className="w-4 h-4" /> Tambah TP Baru
+                  </button>
+                </div>
+
+                {/* Box Capaian Pembelajaran */}
+                <div className="bg-gradient-to-br from-red-50/70 via-amber-50/70 to-yellow-100/40 border-2 border-red-300/80 rounded-2xl p-4 mb-6">
+                  <div className="text-xs font-extrabold text-red-800 uppercase tracking-wider mb-1.5">
+                    Capaian Pembelajaran ({classData.fase})
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={cpText}
+                    onChange={(e) => setCpText(e.target.value)}
+                    className="w-full bg-transparent text-sm text-slate-800 font-medium focus:outline-none resize-none"
+                  />
+                </div>
+
+                {/* Daftar Tujuan Pembelajaran */}
+                <div className="space-y-3">
+                  <div className="text-sm font-extrabold text-slate-900">Tujuan Pembelajaran</div>
+                  {tps.map((tp) => (
+                    <div
+                      key={tp.id}
+                      className="p-4 rounded-2xl border border-red-200/90 bg-white hover:border-red-400 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
+                    >
+                      <div className="flex items-start sm:items-center gap-3.5 flex-1">
+                        <span className="px-3 py-1.5 rounded-xl bg-gradient-to-br from-red-700 to-amber-500 text-white font-extrabold text-sm shrink-0 shadow-2xs">
+                          {tp.code}
+                        </span>
+                        <div className="flex-1 space-y-1">
+                          <input
+                            type="text"
+                            value={tp.title}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setTps(prev => prev.map(item => item.id === tp.id ? { ...item, title: val } : item));
+                            }}
+                            className="w-full font-extrabold text-slate-900 text-sm md:text-base focus:outline-none focus:underline"
+                          />
+                          <div className="text-xs text-slate-500">
+                            Materi: {tp.materi} • Alokasi: <b className="text-red-800">{tp.jp} JP</b>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 p-1.5 rounded-lg">
+                          <Check className="w-4 h-4" />
+                        </span>
+                        {tps.length > 1 && (
+                          <button
+                            onClick={() => setTps(tps.filter(item => item.id !== tp.id))}
+                            className="text-slate-400 hover:text-rose-600 p-1.5"
+                            title="Hapus TP"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 flex justify-between items-center pt-4 border-t border-red-100">
+                  <span className="text-xs text-slate-600">
+                    Total: <b className="text-red-900">{tps.length} Tujuan Pembelajaran</b> ({tps.reduce((a, b) => a + Number(b.jp), 0)} JP)
+                  </span>
+                  <button
+                    onClick={() => setActiveMenu('persiapan')}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 hover:from-red-800 hover:to-amber-600 text-white font-extrabold text-sm shadow-md shadow-red-600/20 flex items-center gap-2 transition"
+                  >
+                    Lihat ATP, Prota & Promes <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==========================================
+              VIEW 3: ATP, PROTA, PROMES & SILABUS (VIDEO 0:16 - 0:22)
+          ========================================== */}
+          {activeMenu === 'persiapan' && (
+            <div className="space-y-6">
+              {/* Persiapan Semester Stepper (Seperti Video 0:18) */}
+              <div className="bg-white rounded-3xl p-6 border-2 border-red-200/80 shadow-sm">
+                <h2 className="text-lg font-extrabold text-red-900 mb-4 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-red-600" /> Persiapan semester
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                  {[
+                    { id: 'atp', label: 'Alur Tujuan Pembelajaran (ATP)' },
+                    { id: 'prota', label: 'Program Tahunan (Prota)' },
+                    { id: 'promes', label: 'Program Semester (Promes)' },
+                    { id: 'silabus', label: 'Silabus' },
+                  ].map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="p-4 rounded-2xl border border-red-200 bg-gradient-to-br from-red-50/60 via-amber-50/40 to-white flex flex-col justify-between gap-3 shadow-2xs"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-red-700 to-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <span className="font-extrabold text-slate-900 text-xs leading-snug">{doc.label}</span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 font-extrabold text-[11px] shrink-0">
+                          ✓ Siap
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => generateWordDocument(doc.id, `${doc.label} ${classData.subject} ${classData.activeClass} ${classData.academicYear}`)}
+                        className="w-full py-2 px-3 rounded-xl bg-white hover:bg-red-50 text-red-900 border border-red-300 font-extrabold text-xs flex items-center justify-center gap-1.5 transition shadow-2xs"
+                      >
+                        <Download className="w-3.5 h-3.5 text-red-600" /> Unduh Word (.doc)
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Visualisasi Program Semester (Promes) 16 Minggu Efektif (Persis Video 0:20 - 0:22) */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-red-200/80 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                  <div>
+                    <h3 className="text-xl font-extrabold text-slate-900">Program Semester (Promes)</h3>
+                    <p className="text-sm text-slate-500">
+                      {classData.semester === 'Ganjil' ? 'Juli–Desember' : 'Januari–Juni'} • 16 minggu efektif (Klik kotak minggu untuk mengatur jadwal JP)
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => generateWordDocument('promes', `Program Semester ${classData.subject} ${classData.activeClass} ${classData.academicYear}`)}
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 text-white font-extrabold text-xs flex items-center gap-1.5 self-start shadow-sm"
+                  >
+                    <Download className="w-4 h-4" /> Unduh Promes (.doc)
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto pb-2">
+                  <div className="min-w-[640px] space-y-3">
+                    {/* Header Angka Minggu 1 - 16 */}
+                    <div className="flex items-center">
+                      <div className="w-44 shrink-0 text-xs font-extrabold text-red-800 uppercase">Tujuan Pembelajaran</div>
+                      <div className="flex-1 grid grid-cols-16 gap-1.5 text-center">
+                        {Array.from({ length: 16 }, (_, i) => i + 1).map(w => (
+                          <div key={w} className="text-xs font-extrabold text-slate-600">{w}</div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Baris TP */}
+                    {tps.map(tp => (
+                      <div key={tp.id} className="flex items-center py-1.5 border-t border-red-100">
+                        <div className="w-44 shrink-0 pr-3">
+                          <div className="font-extrabold text-red-700 text-sm">TP {tp.code}</div>
+                          <div className="text-xs text-slate-700 truncate font-semibold">{tp.title}</div>
+                          <div className="text-[11px] text-amber-700 font-bold">{tp.jp} JP</div>
+                        </div>
+                        <div className="flex-1 grid grid-cols-16 gap-1.5">
+                          {Array.from({ length: 16 }, (_, i) => i + 1).map(w => {
+                            const active = tp.weeks.includes(w);
+                            return (
+                              <button
+                                key={w}
+                                onClick={() => togglePromesWeek(tp.id, w)}
+                                title={`TP ${tp.code} - Minggu ke-${w}`}
+                                className={`h-9 rounded-lg border transition-all ${
+                                  active
+                                    ? 'bg-gradient-to-br from-red-700 to-amber-500 border-red-700 shadow-xs'
+                                    : 'bg-red-50/40 border-red-200/70 hover:bg-amber-100/60'
+                                }`}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tabel Ringkasan ATP, Prota & Silabus */}
+              <div className="bg-white rounded-3xl p-6 border-2 border-red-200/80 shadow-sm">
+                <h3 className="text-lg font-extrabold text-slate-900 mb-4">
+                  Pratinjau Tabel ATP, Prota & Silabus ({classData.subject} - {classData.activeClass})
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b border-red-200 text-red-900 text-xs uppercase bg-gradient-to-r from-red-50 to-amber-50">
+                        <th className="p-3 font-extrabold">Kode</th>
+                        <th className="p-3 font-extrabold">Tujuan Pembelajaran</th>
+                        <th className="p-3 font-extrabold">Materi Pokok</th>
+                        <th className="p-3 font-extrabold">Indikator Ketercapaian (IKTP)</th>
+                        <th className="p-3 font-extrabold text-center">Alokasi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-red-100">
+                      {tps.map(tp => (
+                        <tr key={tp.id} className="hover:bg-red-50/40">
+                          <td className="p-3 font-extrabold text-red-700">{tp.code}</td>
+                          <td className="p-3 font-bold text-slate-900">{tp.title}</td>
+                          <td className="p-3 text-slate-600">{tp.materi}</td>
+                          <td className="p-3 text-slate-600">{tp.indikator}</td>
+                          <td className="p-3 text-center font-extrabold text-red-900">{tp.jp} JP</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==========================================
+              VIEW 4: MODUL AJAR / RPP, LKPD & SOAL KUIS (VIDEO 0:23 - 0:29)
+          ========================================== */}
+          {activeMenu === 'perangkat' && (
+            <div className="space-y-6">
+              {/* 3 Kartu Pilihan Dokumen + Pilih Tujuan Pembelajaran (Persis Video 0:27 - 0:29) */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-red-200/80 shadow-sm space-y-6">
+                <div className="grid grid-cols-3 gap-3 md:gap-4">
+                  {[
+                    { id: 'modul', title: 'Modul Ajar / RPP' },
+                    { id: 'lkpd', title: 'LKPD' },
+                    { id: 'kuis', title: 'Soal Harian dan Kuis' },
+                  ].map(card => {
+                    const active = perangkatType === card.id;
+                    return (
+                      <button
+                        key={card.id}
+                        onClick={() => setPerangkatType(card.id)}
+                        className={`p-4 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-center gap-2 ${
+                          active
+                            ? 'border-red-500 bg-gradient-to-br from-red-50 via-amber-50 to-yellow-100/60 shadow-sm'
+                            : 'border-red-200/80 bg-white hover:border-red-400'
+                        }`}
+                      >
+                        <FileText className={`w-7 h-7 ${active ? 'text-red-600' : 'text-slate-400'}`} />
+                        <div className="font-extrabold text-slate-900 text-xs sm:text-sm">{card.title}</div>
+                        <span className="text-emerald-600 font-bold text-xs flex items-center gap-0.5">
+                          <Check className="w-3.5 h-3.5" /> Siap
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Pilih Tujuan Pembelajaran */}
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 mb-3">Pilih tujuan pembelajaran</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {tps.map(tp => {
+                      const isSelected = selectedTp.id === tp.id;
+                      return (
+                        <button
+                          key={tp.id}
+                          onClick={() => setSelectedTpId(tp.id)}
+                          className={`p-3.5 rounded-2xl border-2 text-left transition flex items-center justify-between ${
+                            isSelected
+                              ? 'border-red-500 bg-red-50/60 shadow-xs'
+                              : 'border-red-200/70 hover:border-red-400 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-red-700 to-amber-500 text-white font-extrabold text-xs">{tp.code}</span>
+                            <span className="font-bold text-slate-900 text-sm">{tp.title}</span>
+                          </div>
+                          {isSelected && <CheckCircle2 className="w-4 h-4 text-red-600 shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Pratinjau Dokumen Kertas A4 */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-red-200/80 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-6 border-b border-red-100">
+                  <div>
+                    <span className="text-xs font-extrabold uppercase text-red-700">Pratinjau Dokumen Siap Cetak (Format Sekolah)</span>
+                    <h3 className="text-lg font-extrabold text-slate-900">
+                      {perangkatType === 'modul' ? 'Modul Ajar / RPP' : perangkatType === 'lkpd' ? 'Lembar Kerja Peserta Didik (LKPD)' : 'Soal Harian dan Kuis Formatif'} — TP {selectedTp.code} ({selectedTp.title})
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() =>
+                      generateWordDocument(
+                        perangkatType === 'modul' ? 'modul' : perangkatType === 'lkpd' ? 'lkpd' : 'asesmen',
+                        `${perangkatType.toUpperCase()} TP ${selectedTp.code} ${selectedTp.title} ${classData.activeClass}`
+                      )
+                    }
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 hover:from-red-800 hover:to-amber-600 text-white font-extrabold text-xs flex items-center gap-2 self-start shrink-0 shadow-sm"
+                  >
+                    <Download className="w-4 h-4" /> Unduh File Word (.doc)
+                  </button>
+                </div>
+
+                {/* Simulasi Lembar A4 dengan Kop Sekolah */}
+                <div className="border border-red-300 rounded-2xl p-6 md:p-8 bg-white text-slate-900 space-y-4 shadow-inner">
+                  {classData.useSchoolHeader && (
+                    <div className="text-center border-b-4 border-double border-slate-900 pb-3 mb-4">
+                      <div className="text-xs font-bold uppercase">{classData.pemda}</div>
+                      <div className="text-xs font-bold uppercase">{classData.dinas}</div>
+                      <div className="text-lg font-extrabold uppercase">{classData.schoolName}</div>
+                      <div className="text-[11px] text-slate-600">{classData.address}</div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 text-xs gap-y-1 bg-gradient-to-r from-red-50/60 to-amber-50/60 p-3.5 rounded-xl border border-red-200">
+                    <div><b>Satuan Pendidikan:</b> {classData.schoolName}</div>
+                    <div><b>Kelas / Fase:</b> {classData.activeClass} / {classData.fase}</div>
+                    <div><b>Mata Pelajaran:</b> {classData.subject}</div>
+                    <div><b>Alokasi Waktu:</b> {selectedTp.jp} JP (Minggu ke-{selectedTp.weeks.join(', ')})</div>
+                  </div>
+
+                  {perangkatType === 'modul' && (
+                    <div className="space-y-3 text-sm">
+                      <div>
+                        <h4 className="font-bold text-slate-900">A. Tujuan Pembelajaran (TP {selectedTp.code})</h4>
+                        <p className="text-slate-700">{selectedTp.indikator}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">B. Langkah-Langkah Kegiatan Pembelajaran</h4>
+                        <ul className="list-disc pl-5 space-y-1 text-slate-700">
+                          <li><b>Pendahuluan (10 Menit):</b> Salam, doa, presensi siswa kelas {classData.activeClass}, dan apersepsi mengaitkan materi <b>{selectedTp.title}</b> dengan kehidupan nyata.</li>
+                          <li><b>Kegiatan Inti (60 Menit):</b> {selectedTp.aktivitas}</li>
+                          <li><b>Penutup (10 Menit):</b> Refleksi bersama peserta didik, kesimpulan materi {selectedTp.materi}, dan kuis evaluasi singkat.</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">C. Asesmen Pembelajaran</h4>
+                        <p className="text-slate-700">Asesmen Formatif (Observasi diskusi & LKPD) serta Asesmen Sumatif Lingkup Materi.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {perangkatType === 'lkpd' && (
+                    <div className="space-y-4 text-sm">
+                      <div className="p-3 border border-dashed border-red-400 rounded-xl text-xs space-y-1 bg-red-50/30">
+                        <div><b>Nama Kelompok / Siswa:</b> ..................................................................</div>
+                        <div><b>Kelas:</b> {classData.activeClass} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Materi:</b> {selectedTp.title}</div>
+                      </div>
+                      <div>
+                        <h4 className="font-bold">Petunjuk Aktivitas Kelompok:</h4>
+                        <p className="text-slate-700">{selectedTp.aktivitas}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-bold">Tugas Diskusi:</h4>
+                        <p className="text-slate-800 font-medium mt-1">1. {selectedTp.essay}</p>
+                        <div className="mt-2 h-20 border border-red-200 rounded-xl bg-red-50/20 p-2 text-xs text-slate-400">
+                          Area jawaban tertulis peserta didik...
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {perangkatType === 'kuis' && (
+                    <div className="space-y-4 text-sm">
+                      <h4 className="font-bold">Soal Kuis Harian — TP {selectedTp.code} ({selectedTp.title})</h4>
+                      <div className="space-y-3">
+                        {selectedTp.questions.map((q, i) => (
+                          <div key={i} className="p-3.5 rounded-xl bg-red-50/40 border border-red-200">
+                            <div className="font-semibold text-slate-900">{i + 1}. {q.q}</div>
+                            <div className="grid grid-cols-2 gap-1 mt-1.5 text-xs text-slate-700">
+                              <div>A. {q.options[0]}</div>
+                              <div>B. {q.options[1]}</div>
+                              <div>C. {q.options[2]}</div>
+                              <div>D. {q.options[3]}</div>
+                            </div>
+                            <div className="mt-2 text-xs font-bold text-emerald-700">
+                              Kunci Jawaban: {q.ans} • Level Kognitif: {q.level}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==========================================
+              VIEW 5: MODE HARIAN DI KELAS / HP MODE (VIDEO 0:30 - 0:36)
+          ========================================== */}
+          {activeMenu === 'harian' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Frame HP Interaktif (Persis Video 0:30 - 0:35) */}
+              <div className="lg:col-span-5 flex justify-center">
+                <div className="w-full max-w-[380px] bg-white rounded-[36px] border-[6px] border-red-950 shadow-2xl p-5 space-y-5">
+                  <div className="w-16 h-1.5 bg-red-200 rounded-full mx-auto" />
+                  <div>
+                    <div className="text-xs font-semibold text-slate-500">
+                      {journalDate} • <span className="font-extrabold text-red-700">{classData.activeClass}</span>
+                    </div>
+                    <h3 className="text-xl font-extrabold text-slate-900 mt-0.5">
+                      {dailyTab === 'presensi' ? 'Presensi' : dailyTab === 'jurnal' ? 'Jurnal mengajar' : 'Daftar Nilai'}
+                    </h3>
+                  </div>
+
+                  {/* Tab Switcher: Presensi | Jurnal | Nilai */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'presensi', label: 'Presensi' },
+                      { id: 'jurnal', label: 'Jurnal' },
+                      { id: 'nilai', label: 'Nilai' },
+                    ].map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => setDailyTab(t.id)}
+                        className={`py-2 px-3 rounded-xl font-extrabold text-xs transition ${
+                          dailyTab === t.id
+                            ? 'bg-gradient-to-r from-red-700 to-amber-500 text-white shadow-xs'
+                            : 'bg-red-50 text-red-900 border border-red-200'
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* TAB 1: PRESENSI */}
+                  {dailyTab === 'presensi' && (
+                    <div className="space-y-2.5">
+                      {students.map(s => (
+                        <div
+                          key={s.id}
+                          className="p-3 rounded-xl border border-red-200/80 bg-red-50/30 flex items-center justify-between"
+                        >
+                          <span className="font-bold text-slate-900 text-sm">{s.name.split(' ')[0]}</span>
+                          <div className="flex items-center gap-1">
+                            {['H', 'S', 'I', 'A'].map(status => {
+                              const active = s.attendance === status;
+                              const label = status === 'H' ? 'Hadir' : status;
+                              return (
+                                <button
+                                  key={status}
+                                  onClick={() =>
+                                    setStudents(prev => prev.map(st => st.id === s.id ? { ...st, attendance: status } : st))
+                                  }
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                                    active
+                                      ? status === 'H'
+                                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                        : 'bg-gradient-to-r from-red-600 to-amber-500 text-white'
+                                      : 'bg-white text-slate-500 border border-slate-200'
+                                  }`}
+                                >
+                                  {label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => showToast(`Presensi kelas ${classData.activeClass} berhasil disimpan!`)}
+                        className="w-full mt-2 py-2.5 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 text-white font-extrabold text-xs shadow-sm"
+                      >
+                        Simpan Presensi Hari Ini
+                      </button>
+                    </div>
+                  )}
+
+                  {/* TAB 2: JURNAL MENGAJAR */}
+                  {dailyTab === 'jurnal' && (
+                    <div className="space-y-3">
+                      <div className="p-3.5 rounded-xl border border-red-200 bg-red-50/40 space-y-3">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-600">Tanggal Pertemuan</label>
+                          <input
+                            type="text"
+                            value={journalDate}
+                            onChange={(e) => setJournalDate(e.target.value)}
+                            className="w-full mt-1 px-2.5 py-1.5 rounded-lg border border-red-300 text-xs font-semibold bg-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-600">Materi (Sesuai TP)</label>
+                          <select
+                            value={journalMateri}
+                            onChange={(e) => setJournalMateri(e.target.value)}
+                            className="w-full mt-1 px-2.5 py-1.5 rounded-lg border border-red-300 text-xs font-bold bg-white"
+                          >
+                            {tps.map(tp => (
+                              <option key={tp.id} value={tp.title}>TP {tp.code} - {tp.title}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-600">Kegiatan di Kelas</label>
+                          <textarea
+                            rows={2}
+                            value={journalActivity}
+                            onChange={(e) => setJournalActivity(e.target.value)}
+                            className="w-full mt-1 px-2.5 py-1.5 rounded-lg border border-red-300 text-xs font-medium bg-white"
+                          />
+                        </div>
+                        <button
+                          onClick={() => {
+                            const presentCount = `${students.filter(s => s.attendance === 'H').length}/${students.length} Hadir`;
+                            setJournals([
+                              { id: Date.now(), date: journalDate, rombel: classData.activeClass, materi: journalMateri, activity: journalActivity, presentCount },
+                              ...journals
+                            ]);
+                            showToast('Jurnal mengajar berhasil disimpan!');
+                          }}
+                          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 text-white font-extrabold text-xs shadow-sm"
+                        >
+                          Simpan jurnal
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 3: DAFTAR NILAI (HP View) */}
+                  {dailyTab === 'nilai' && (
+                    <div className="overflow-hidden rounded-xl border border-red-200">
+                      <table className="w-full text-xs text-left">
+                        <thead className="bg-gradient-to-r from-red-700 to-amber-500 text-white font-extrabold">
+                          <tr>
+                            <th className="p-2.5">Nama Siswa</th>
+                            <th className="p-2.5 text-center">TP 1</th>
+                            <th className="p-2.5 text-center">TP 2</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-red-100 bg-white">
+                          {students.map(s => (
+                            <tr key={s.id}>
+                              <td className="p-2.5 font-semibold text-slate-900">{s.name.split(' ')[0]}</td>
+                              <td className="p-2 text-center">
+                                <input
+                                  type="number"
+                                  value={s.tp1}
+                                  onChange={(e) =>
+                                    setStudents(prev => prev.map(st => st.id === s.id ? { ...st, tp1: e.target.value } : st))
+                                  }
+                                  className="w-12 text-center font-medium border border-red-200 rounded py-0.5"
+                                />
+                              </td>
+                              <td className="p-2 text-center">
+                                <input
+                                  type="number"
+                                  value={s.tp2}
+                                  onChange={(e) =>
+                                    setStudents(prev => prev.map(st => st.id === s.id ? { ...st, tp2: e.target.value } : st))
+                                  }
+                                  className="w-12 text-center font-extrabold text-red-800 border border-red-300 bg-amber-50 rounded py-0.5"
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Panel Tabel Lengkap Desktop (Daftar Nilai Semua TP + Riwayat Jurnal) */}
+              <div className="lg:col-span-7 space-y-6">
+                <div className="bg-white rounded-3xl p-6 border-2 border-red-200/80 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div>
+                      <h3 className="text-lg font-extrabold text-slate-900">
+                        Tabel Lengkap Daftar Nilai & Presensi ({classData.activeClass})
+                      </h3>
+                      <p className="text-xs text-slate-500">Ubah angka nilai TP, STS, atau SAS—nilai akhir dan deskripsi rapor otomatis dihitung</p>
+                    </div>
+                    <button
+                      onClick={() => generateWordDocument('nilai', `Daftar Nilai ${classData.subject} ${classData.activeClass}`)}
+                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 text-white font-extrabold text-xs flex items-center gap-1.5 self-start shrink-0 shadow-xs"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Unduh Daftar Nilai (.doc)
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left border-collapse">
+                      <thead>
+                        <tr className="bg-gradient-to-r from-red-50 to-amber-50 text-red-950 font-extrabold border-b border-red-200">
+                          <th className="p-2.5">Nama Siswa</th>
+                          <th className="p-2.5 text-center">Presensi</th>
+                          <th className="p-2.5 text-center">TP 1</th>
+                          <th className="p-2.5 text-center">TP 2</th>
+                          <th className="p-2.5 text-center">TP 3</th>
+                          <th className="p-2.5 text-center">TP 4</th>
+                          <th className="p-2.5 text-center">STS</th>
+                          <th className="p-2.5 text-center">SAS</th>
+                          <th className="p-2.5 text-center">Akhir</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-red-100">
+                        {studentsWithSummary.map(s => (
+                          <tr key={s.id} className="hover:bg-red-50/40">
+                            <td className="p-2.5 font-bold text-slate-900">{s.name}</td>
+                            <td className="p-2.5 text-center">
+                              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">
+                                {s.attendance}
+                              </span>
+                            </td>
+                            {['tp1', 'tp2', 'tp3', 'tp4', 'sts', 'sas'].map(field => (
+                              <td key={field} className="p-1.5 text-center">
+                                <input
+                                  type="number"
+                                  value={s[field]}
+                                  onChange={(e) =>
+                                    setStudents(prev => prev.map(st => st.id === s.id ? { ...st, [field]: e.target.value } : st))
+                                  }
+                                  className="w-12 text-center py-1 rounded border border-red-200 font-semibold focus:border-red-600 focus:outline-none"
+                                />
+                              </td>
+                            ))}
+                            <td className="p-2.5 text-center font-extrabold text-red-800">{s.finalScore}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Tambah Siswa Baru */}
+                  <div className="mt-4 pt-3 border-t border-red-100 flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Ketik nama siswa baru..."
+                      value={newStudentName}
+                      onChange={(e) => setNewStudentName(e.target.value)}
+                      className="flex-1 px-3 py-2 rounded-xl border border-red-300 text-xs font-medium"
+                    />
+                    <button
+                      onClick={() => {
+                        if (!newStudentName.trim()) return;
+                        setStudents([
+                          ...students,
+                          {
+                            id: Date.now(),
+                            name: newStudentName.trim(),
+                            nis: `26270700${students.length + 1}`,
+                            attendance: 'H',
+                            tp1: 80, tp2: 82, tp3: 80, tp4: 84, sts: 80, sas: 82
+                          }
+                        ]);
+                        setNewStudentName('');
+                        showToast('Siswa baru berhasil ditambahkan!');
+                      }}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-900 to-amber-900 text-amber-100 font-bold text-xs flex items-center gap-1 hover:from-red-800 hover:to-amber-800"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Tambah Siswa
+                    </button>
+                  </div>
+                </div>
+
+                {/* Riwayat Jurnal Mengajar */}
+                <div className="bg-white rounded-3xl p-6 border-2 border-red-200/80 shadow-sm">
+                  <h3 className="text-base font-extrabold text-slate-900 mb-3">Riwayat Jurnal Mengajar</h3>
+                  <div className="space-y-2.5">
+                    {journals.map(j => (
+                      <div key={j.id} className="p-3.5 rounded-2xl border border-red-200 bg-gradient-to-r from-red-50/40 to-amber-50/40 flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-extrabold text-red-800">{j.date} • Kelas {j.rombel}</div>
+                          <div className="font-bold text-slate-900 text-sm">{j.materi}</div>
+                          <div className="text-xs text-slate-600">{j.activity}</div>
+                        </div>
+                        <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg">
+                          {j.presentCount}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==========================================
+              VIEW 6: ASESMEN SUMATIF & SOAL STS/SAS (VIDEO 0:37 - 0:43)
+          ========================================== */}
+          {activeMenu === 'asesmen' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-red-200/80 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-900">Asesmen & Ujian Semester</h2>
+                    <p className="text-sm text-slate-500">Lengkap dengan Kisi-kisi, Soal & Kunci Jawaban, serta Lembar Siswa siap cetak</p>
+                  </div>
+                  <button
+                    onClick={() => generateWordDocument('asesmen', `${examType} Lengkap Kisi-Kisi & Soal ${classData.subject} ${classData.activeClass}`)}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 hover:from-red-800 hover:to-amber-600 text-white font-extrabold text-xs flex items-center gap-2 self-start shadow-md shadow-red-600/20"
+                  >
+                    <Download className="w-4 h-4" /> Unduh Paket Soal (.doc)
+                  </button>
+                </div>
+
+                {/* Pilihan Jenis Ujian (Seperti Video 0:39) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {['Asesmen Sumatif', 'Soal STS dan SAS'].map(type => (
+                    <button
+                      key={type}
+                      onClick={() => setExamType(type)}
+                      className={`p-4 rounded-2xl border-2 text-left flex items-center justify-between transition ${
+                        examType === type
+                          ? 'border-red-500 bg-gradient-to-r from-red-50 to-amber-50/70 shadow-xs'
+                          : 'border-red-200/80 hover:border-red-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-red-600" />
+                        <span className="font-extrabold text-slate-900 text-base">{type}</span>
+                      </div>
+                      <CheckCircle2 className={`w-5 h-5 ${examType === type ? 'text-red-600' : 'text-slate-300'}`} />
+                    </button>
+                  ))}
+                </div>
+
+                {/* 3 Kartu Bertumpuk: Kisi-kisi | Soal dan Kunci Jawaban | Lembar Siswa (Video 0:41 - 0:43) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { id: 'kisi', title: 'Kisi-kisi', desc: 'Pemetaan TP, Indikator & Level Kognitif' },
+                    { id: 'soal_kunci', title: 'Soal dan Kunci Jawaban', desc: 'Naskah soal lengkap + kunci & skor' },
+                    { id: 'lembar_siswa', title: 'Lembar Siswa', desc: 'Naskah bersih siap dibagikan ke siswa' },
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setExamDocTab(tab.id)}
+                      className={`p-4 rounded-2xl border text-left transition ${
+                        examDocTab === tab.id
+                          ? 'border-2 border-red-500 bg-white shadow-sm'
+                          : 'border-red-200/70 bg-red-50/30 hover:bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 font-extrabold text-slate-900 text-sm">
+                        <FileText className="w-4 h-4 text-red-600" /> {tab.title}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">{tab.desc}</p>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Konten Pratinjau Kisi-kisi / Soal / Lembar Siswa */}
+                <div className="border border-red-200 rounded-2xl p-5 bg-red-50/30">
+                  {examDocTab === 'kisi' && (
+                    <div>
+                      <h4 className="font-extrabold text-slate-900 text-sm mb-3">
+                        Kisi-Kisi Penulisan {examType} — {classData.subject} ({classData.activeClass})
+                      </h4>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs text-left border-collapse bg-white rounded-xl overflow-hidden">
+                          <thead>
+                            <tr className="bg-gradient-to-r from-red-100/80 to-amber-100/80 border-b border-red-200 font-extrabold text-red-950">
+                              <th className="p-2.5">Kode TP</th>
+                              <th className="p-2.5">Materi Pokok</th>
+                              <th className="p-2.5">Indikator Soal</th>
+                              <th className="p-2.5 text-center">Level</th>
+                              <th className="p-2.5 text-center">Bentuk</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-red-100">
+                            {tps.map(tp => (
+                              <tr key={tp.id}>
+                                <td className="p-2.5 font-extrabold text-red-700">{tp.code}</td>
+                                <td className="p-2.5 font-semibold">{tp.materi}</td>
+                                <td className="p-2.5 text-slate-600">{tp.indikator}</td>
+                                <td className="p-2.5 text-center font-bold">L2 / C3</td>
+                                <td className="p-2.5 text-center">PG & Essay</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {(examDocTab === 'soal_kunci' || examDocTab === 'lembar_siswa') && (
+                    <div className="space-y-4">
+                      <h4 className="font-extrabold text-slate-900 text-sm">
+                        {examDocTab === 'soal_kunci' ? 'Naskah Soal & Kunci Jawaban' : 'Lembar Soal Peserta Didik (Tanpa Kunci)'}
+                      </h4>
+                      <div className="space-y-3">
+                        {tps.flatMap(tp =>
+                          tp.questions.map((q, idx) => (
+                            <div key={`${tp.id}_${idx}`} className="p-3.5 rounded-xl bg-white border border-red-200 text-sm">
+                              <div className="font-semibold text-slate-900">
+                                <span className="text-xs font-extrabold text-red-700 mr-2">[TP {tp.code}]</span>
+                                {q.q}
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-2 text-xs text-slate-700">
+                                <div>A. {q.options[0]}</div>
+                                <div>B. {q.options[1]}</div>
+                                <div>C. {q.options[2]}</div>
+                                <div>D. {q.options[3]}</div>
+                              </div>
+                              {examDocTab === 'soal_kunci' && (
+                                <div className="mt-2 pt-2 border-t border-red-100 text-xs font-bold text-emerald-700">
+                                  ✓ Kunci Jawaban: {q.ans} &nbsp;|&nbsp; Level Kognitif: {q.level}
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==========================================
+              VIEW 7: DESKRIPSI RAPOR & REKAP NILAI (VIDEO 0:44 - 0:50)
+          ========================================== */}
+          {activeMenu === 'rapor' && (
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-red-200/80 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-900">
+                      Deskripsi Rapor • {classData.activeClass}
+                    </h2>
+                    <p className="text-sm text-slate-500">
+                      Deskripsi capaian kompetensi tiap anak otomatis tersusun dari nilai tertinggi dan terendah TP mereka.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Kartu Siswa + Nilai + Deskripsi Otomatis (Persis Video 0:46 - 0:50) */}
+                <div className="space-y-3.5">
+                  {studentsWithSummary.map(s => (
+                    <div
+                      key={s.id}
+                      className="p-4 rounded-2xl border border-red-200/90 bg-gradient-to-r from-red-50/40 via-white to-amber-50/40 hover:border-red-400 transition space-y-1.5 shadow-2xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-extrabold text-slate-900 text-base">{s.name}</span>
+                        <span className="px-3.5 py-1 rounded-xl bg-gradient-to-r from-red-700 to-amber-500 text-white font-extrabold text-sm shadow-2xs">
+                          {s.finalScore}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-600 leading-relaxed">{s.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <button
+                    onClick={() => generateWordDocument('rapor', `Rekap Nilai & Deskripsi Rapor ${classData.subject} ${classData.activeClass} ${classData.academicYear}`)}
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 hover:from-red-800 hover:to-amber-600 text-white font-extrabold text-sm shadow-md shadow-red-600/20 flex items-center justify-center gap-2 transition"
+                  >
+                    <Download className="w-4 h-4" /> Ekspor: Rekap Nilai Rapor (.doc)
+                  </button>
+                  <button
+                    onClick={exportERaporCsv}
+                    className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition"
+                  >
+                    <FileSpreadsheet className="w-4 h-4" /> Ekspor CSV untuk e-Rapor
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==========================================
+              VIEW 8: FORMAT SEKOLAH / KOP SURAT (VIDEO 0:55 - 0:57)
+          ========================================== */}
+          {activeMenu === 'template' && (
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-red-200/80 shadow-sm space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-extrabold text-slate-900">Template Administrasi Kelas (Format Sekolah)</h2>
+                    <p className="text-xs text-slate-500">Sesuaikan kop surat resmi sekolah agar langsung tercetak di setiap dokumen Word</p>
+                  </div>
+                  <span className="px-3 py-1 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200">
+                    ✓ Pakai format sekolah
+                  </span>
+                </div>
+
+                {/* Live Preview Kop Surat (Seperti Video 0:56) */}
+                <div className="p-6 rounded-2xl border-2 border-red-500 bg-gradient-to-b from-red-50/40 via-amber-50/30 to-white shadow-xs text-center space-y-1">
+                  <div className="text-xs font-bold text-slate-800 uppercase">{classData.pemda}</div>
+                  <div className="text-xs font-bold text-slate-800 uppercase">{classData.dinas}</div>
+                  <div className="text-lg font-extrabold text-slate-900 uppercase">{classData.schoolName}</div>
+                  <div className="text-xs text-slate-500 pb-2 border-b-2 border-slate-800">{classData.address}</div>
+                  <div className="pt-3 font-extrabold text-red-700 text-sm">
+                    MODUL AJAR & PERANGKAT ADMINISTRASI • {classData.activeClass}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">Baris 1: Pemerintah Daerah</label>
+                    <input
+                      type="text"
+                      value={classData.pemda}
+                      onChange={(e) => setClassData({ ...classData, pemda: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-red-300 text-sm font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">Baris 2: Dinas Pendidikan</label>
+                    <input
+                      type="text"
+                      value={classData.dinas}
+                      onChange={(e) => setClassData({ ...classData, dinas: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-red-300 text-sm font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">Baris 3: Nama Satuan Pendidikan</label>
+                    <input
+                      type="text"
+                      value={classData.schoolName}
+                      onChange={(e) => setClassData({ ...classData, schoolName: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-red-300 text-sm font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">Baris 4: Alamat Lengkap Sekolah</label>
+                    <input
+                      type="text"
+                      value={classData.address}
+                      onChange={(e) => setClassData({ ...classData, address: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-red-300 text-sm font-semibold"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==========================================
+              VIEW 9: PAKET SIAP SUPERVISI & UNDUH SEMUA WORD (VIDEO 0:51 - 0:54 & 1:02 - 1:07)
+          ========================================== */}
+          {activeMenu === 'supervisi' && (
+            <div className="max-w-3xl mx-auto space-y-6">
+              {/* Paket Siap Supervisi Card (Persis Video 0:51 - 0:54) */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 border-2 border-red-200/80 shadow-md space-y-5">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-900">Paket Siap Supervisi</h2>
+                    <p className="text-sm text-slate-500">
+                      Seluruh dokumen {classData.subject} Kelas {classData.activeClass} ({classData.academicYear}) sudah terhubung dan siap diunduh dalam format MS Word (.doc)
+                    </p>
+                  </div>
+                  <span className="bg-gradient-to-r from-red-700 to-amber-500 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl shadow-2xs shrink-0">
+                    Dalam hitungan menit
+                  </span>
+                </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    { id: 'atp', label: `Alur Tujuan Pembelajaran (ATP) ${classData.subject} ${classData.activeClass} ${classData.academicYear}.doc` },
+                    { id: 'prota', label: `Program Tahunan ${classData.subject} ${classData.activeClass} ${classData.academicYear}.doc` },
+                    { id: 'promes', label: `Program Semester ${classData.subject} ${classData.activeClass} ${classData.academicYear}.doc` },
+                    { id: 'silabus', label: `Silabus ${classData.subject} ${classData.activeClass} ${classData.academicYear}.doc` },
+                    { id: 'modul', label: `Modul Ajar / RPP ${classData.subject} ${classData.activeClass} ${classData.academicYear}.doc` },
+                    { id: 'asesmen', label: `Asesmen Sumatif & Kisi-Kisi ${classData.subject} ${classData.activeClass} ${classData.academicYear}.doc` },
+                    { id: 'nilai', label: `Daftar Nilai ${classData.subject} ${classData.activeClass} ${classData.academicYear}.doc` },
+                    { id: 'rapor', label: `Rekap Nilai untuk e-Rapor ${classData.subject} ${classData.activeClass} ${classData.academicYear}.doc` },
+                  ].map((item) => {
+                    const isDownloaded = downloadedDocs[item.id];
+                    return (
+                      <div
+                        key={item.id}
+                        className={`p-3.5 rounded-2xl border-2 transition flex items-center justify-between gap-3 ${
+                          isDownloaded ? 'border-red-500 bg-red-50/40' : 'border-red-200/80 bg-white hover:border-red-400'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-100 to-amber-100 text-red-700 flex items-center justify-center shrink-0">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">{item.label}</span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="hidden sm:inline-block px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-xs">
+                            Sudah ada
+                          </span>
+                          <button
+                            onClick={() => generateWordDocument(item.id, item.label.replace('.doc', ''))}
+                            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-red-700 to-amber-500 hover:from-red-800 hover:to-amber-600 text-white font-extrabold text-xs flex items-center gap-1 shadow-2xs"
+                          >
+                            <Download className="w-3.5 h-3.5" /> Unduh
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => {
+                    generateWordDocument('paket_lengkap', `Paket Lengkap Supervisi Administrasi Guru ${classData.subject} ${classData.activeClass} ${classData.academicYear}`);
+                    setDownloadedDocs({ atp: true, prota: true, promes: true, silabus: true, modul: true, asesmen: true, nilai: true, rapor: true });
+                  }}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-red-700 via-red-600 to-amber-500 hover:from-red-800 hover:to-amber-600 text-white font-extrabold text-base shadow-lg shadow-red-600/25 flex items-center justify-center gap-2 transition"
+                >
+                  <CheckCircle2 className="w-5 h-5" /> Unduh Paket Lengkap Supervisi (.doc)
+                </button>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </main>
+    </div>
+  );
+}
